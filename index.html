@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottery Hustle - Earn Big, Play Bigger</title>
+    <style>
+        /* ===== RESET & FOUNDATION ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            color: #ffffff;
+        }
+
+        /* ===== COLOR PALETTE ===== */
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark-bg: #0f0f1e;
+            --card-bg: #1e1e3f;
+            --card-border: #2d2d5f;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --text-tertiary: #71717a;
+        }
+
+        /* ===== LAYOUT ===== */
+        body {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ===== TOP HUD ===== */
+        #top-hud {
+            background: linear-gradient(180deg, rgba(15, 15, 30, 0.95) 0%, rgba(15, 15, 30, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            z-index: 100;
+            height: 60px;
+        }
+
+        .hud-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .hud-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .hud-stat-icon {
+            font-size: 18px;
+            display: flex;
+        }
+
+        .hud-stat-value {
+            color: var(--text-primary);
+        }
+
+        .hud-stat-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .xp-bar-container {
+            flex: 1;
+            max-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .xp-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+        }
+
+        .xp-bar-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* ===== SCREEN TRANSITIONS ===== */
+        .screen {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 120px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ===== SCROLL BAR STYLE ===== */
+        .screen::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .screen::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .screen::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 4px;
+        }
+
+        .screen::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.6);
+        }
+
+        /* ===== WORK SCREEN (CORE) ===== */
+        #work-screen {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+
+        .job-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .job-button {
+            padding: 12px;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            text-align: center;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .job-button:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .job-button.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-color: var(--primary-light);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .job-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .job-label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* ===== DISH WASHING MINIGAME ===== */
+        #minigame-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .minigame-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-light);
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(135deg, rgba(15, 15, 30, 0.5) 0%, rgba(30, 30, 63, 0.5) 100%);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+            min-height: 300px;
+            max-height: 500px;
+        }
+
+        #plate-canvas {
+            display: block;
+            touch-action: none;
+        }
+
+        .plate-cleanliness {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .cleanliness-bar {
+            width: 200px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 4px;
+            margin-top: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .cleanliness-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), #34d399);
+            width: 0%;
+            transition: width 0.1s ease;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+        }
+
+        .minigame-info {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .minigame-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-light);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== LOTTERY SCREEN ===== */
+        #lottery-screen {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        .lottery-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+
+        .lottery-tab {
+            padding: 10px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            min-width: fit-content;
+        }
+
+        .lottery-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .lottery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .lottery-card {
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(30, 30, 63, 0.8) 100%);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lottery-card:hover:not(.locked) {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+        }
+
+        .lottery-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .lottery-card.unlocked {
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+
+        .ticket-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 8px;
+        }
+
+        .ticket-odds {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .ticket-jackpot {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .jackpot-badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 10px;
+            color: var(--success);
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .locked-badge {
+            font-size: 11px;
+            color: var(--warning);
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        /* ===== QUESTS SCREEN ===== */
+        #quests-screen {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        .quests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quest-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .quest-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .quest-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .quest-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .quest-description {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .quest-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .quest-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .quest-reward {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .quest-button {
+            flex-shrink: 0;
+            padding: 8px 12px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            color: var(--primary-light);
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .quest-button:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+        }
+
+        .quest-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== SHOP SCREEN ===== */
+        #shop-screen {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        .shop-category {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .shop-category-title {
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary-light);
+        }
+
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .shop-item {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .shop-item:hover:not(.purchased) {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.2);
+        }
+
+        .shop-item.purchased {
+            opacity: 0.6;
+            border-color: var(--success);
+        }
+
+        .item-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .item-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .item-status {
+            font-size: 10px;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* ===== PROFILE SCREEN ===== */
+        #profile-screen {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            font-size: 64px;
+            margin-bottom: 12px;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .profile-level {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .profile-stat {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .profile-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 4px;
+        }
+
+        .profile-stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .profile-actions .btn {
+            flex: 1;
+        }
+
+        /* ===== BOTTOM NAVIGATION ===== */
+        #bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(15, 15, 30, 0.8) 0%, rgba(15, 15, 30, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            z-index: 101;
+            height: 60px;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            font-size: 24px;
+        }
+
+        .nav-item:hover {
+            color: var(--primary-light);
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--accent);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        /* ===== FLOATING NOTIFICATIONS ===== */
+        #notification-container {
+            position: fixed;
+            top: 70px;
+            right: 16px;
+            z-index: 1000;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .notification {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+            pointer-events: auto;
+            max-width: 300px;
+        }
+
+        .notification-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .notification.out {
+            animation: slideOut 0.3s ease;
+        }
+
+        /* ===== PARTICLES & EFFECTS ===== */
+        #particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 20px;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0.8);
+            }
+        }
+
+        @keyframes confetti {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) rotate(720deg);
+            }
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .modal-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .job-selector {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            }
+
+            .minigame-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-value {
+                font-size: 18px;
+            }
+
+            #canvas-container {
+                min-height: 250px;
+                max-height: 400px;
+            }
+
+            .profile-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .lottery-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .shop-items {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            #top-hud {
+                padding: 10px 12px;
+                height: 50px;
+                font-size: 12px;
+            }
+
+            .hud-stat {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .xp-bar-container {
+                display: none;
+            }
+
+            #game-container {
+                top: 50px;
+                height: calc(100% - 110px);
+            }
+
+            .stat-card {
+                padding: 10px;
+            }
+
+            .stat-value {
+                font-size: 16px;
+            }
+
+            .screen {
+                height: calc(100% - 60px);
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .bounce {
+            animation: bounce 0.6s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- TOP HUD -->
+        <div id="top-hud">
+            <div class="hud-group">
+                <div class="hud-stat">
+                    <span class="hud-stat-icon">💰</span>
+                    <div>
+                        <div class="hud-stat-value">₹<span id="money-display">1000</span></div>
+                        <div class="hud-stat-label">Cash</div>
+                    </div>
+                </div>
+                <div class="hud-stat">
+                    <span class="hud-stat-icon">💎</span>
+                    <div>
+                        <div class="hud-stat-value"><span id="gems-display">50</span></div>
+                        <div class="hud-stat-label">Gems</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="xp-bar-container">
+                <div class="xp-bar">
+                    <div class="xp-bar-fill" id="xp-bar-fill"></div>
+                </div>
+                <div class="xp-bar-label">
+                    Level <span id="level-display">1</span> · <span id="xp-display">0</span>/<span id="xp-max-display">100</span> XP
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREENS -->
+        <div id="work-screen" class="screen active">
+            <div class="job-selector" id="job-selector"></div>
+            <div id="minigame-container" style="display: none;">
+                <div class="minigame-stats">
+                    <div class="stat-card">
+                        <div class="stat-value"><span id="earned-money">₹0</span></div>
+                        <div class="stat-label">Earned This Job</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><span id="earned-xp">0</span></div>
+                        <div class="stat-label">XP This Job</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><span id="plates-washed">0</span></div>
+                        <div class="stat-label">Plates Washed</div>
+                    </div>
+                </div>
+
+                <div id="canvas-container">
+                    <canvas id="plate-canvas"></canvas>
+                    <div class="plate-cleanliness">
+                        <div>Cleanliness: <span id="cleanliness-percent">0</span>%</div>
+                        <div class="cleanliness-bar">
+                            <div class="cleanliness-fill" id="cleanliness-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="minigame-info">
+                    <strong>💡 Tips:</strong> Scrub the dirty spots on the plate. Different stains require different cleaning techniques. Harder stains will take longer to clean!
+                </div>
+
+                <div class="minigame-actions">
+                    <button class="btn btn-secondary" id="back-button">Back to Jobs</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="lottery-screen" class="screen">
+            <div class="lottery-tabs" id="lottery-tabs"></div>
+            <div class="lottery-grid" id="lottery-grid"></div>
+        </div>
+
+        <div id="quests-screen" class="screen">
+            <div class="quests-list" id="quests-list"></div>
+        </div>
+
+        <div id="shop-screen" class="screen">
+            <div id="shop-content"></div>
+        </div>
+
+        <div id="profile-screen" class="screen">
+            <div class="profile-header">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-name">Player</div>
+                <div class="profile-level" id="profile-level">Level 1</div>
+            </div>
+
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <div class="profile-stat-value" id="profile-total-money">₹0</div>
+                    <div class="profile-stat-label">Total Earned</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="profile-stat-value" id="profile-total-xp">0</div>
+                    <div class="profile-stat-label">Total XP</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="profile-stat-value" id="profile-job-level">1</div>
+                    <div class="profile-stat-label">Job Level</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="profile-stat-value" id="profile-achievements">0</div>
+                    <div class="profile-stat-label">Achievements</div>
+                </div>
+            </div>
+
+            <div class="profile-actions" style="margin-top: 20px;">
+                <button class="btn btn-secondary" id="save-button">💾 Save</button>
+                <button class="btn btn-secondary" id="reset-button">🔄 Reset</button>
+            </div>
+        </div>
+
+        <!-- BOTTOM NAVIGATION -->
+        <div id="bottom-nav">
+            <div class="nav-item active" data-screen="work">
+                <span>💼</span>
+                <span class="nav-item-label">Work</span>
+                <div class="nav-item-badge" id="work-badge" style="display: none;">0</div>
+            </div>
+            <div class="nav-item" data-screen="lottery">
+                <span>🎰</span>
+                <span class="nav-item-label">Lottery</span>
+                <div class="nav-item-badge" id="lottery-badge" style="display: none;">0</div>
+            </div>
+            <div class="nav-item" data-screen="quests">
+                <span>⭐</span>
+                <span class="nav-item-label">Quests</span>
+                <div class="nav-item-badge" id="quests-badge" style="display: none;">0</div>
+            </div>
+            <div class="nav-item" data-screen="shop">
+                <span>🛍️</span>
+                <span class="nav-item-label">Shop</span>
+                <div class="nav-item-badge" id="shop-badge" style="display: none;">0</div>
+            </div>
+            <div class="nav-item" data-screen="profile">
+                <span>👤</span>
+                <span class="nav-item-label">Profile</span>
+            </div>
+        </div>
+
+        <!-- PARTICLES -->
+        <div id="particle-container"></div>
+    </div>
+
+    <!-- NOTIFICATION CONTAINER -->
+    <div id="notification-container"></div>
+
+    <!-- MODALS -->
+    <div id="reward-modal" class="modal">
+        <div class="modal-content">
+            <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+            <div class="modal-title">Plate Cleaned!</div>
+            <div class="modal-description" id="reward-text"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="continue-button">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== GAME STATE & CONSTANTS =====
+        const JOBS = {
+            DISH_WASHER: { id: 0, name: 'Dish Washer', icon: '🍽️', unlockLevel: 0, minigame: 'washPlates' },
+            RESTAURANT_CLEANER: { id: 1, name: 'Restaurant Cleaner', icon: '🧹', unlockLevel: 3, minigame: 'cleanFloor' },
+            GROCERY_WORKER: { id: 2, name: 'Grocery Worker', icon: '🛒', unlockLevel: 5, minigame: 'stock' },
+            DELIVERY_RIDER: { id: 3, name: 'Delivery Rider', icon: '🚴', unlockLevel: 8, minigame: 'deliver' },
+            OFFICE_WORKER: { id: 4, name: 'Office Worker', icon: '💻', unlockLevel: 12, minigame: 'type' },
+            SHOP_MANAGER: { id: 5, name: 'Shop Manager', icon: '🏪', unlockLevel: 16, minigame: 'manage' },
+            BUSINESS_OWNER: { id: 6, name: 'Business Owner', icon: '🏢', unlockLevel: 20, minigame: 'negotiate' }
+        };
+
+        const LOTTERY_TICKETS = {
+            BASIC_10: { price: 10, odds: 0.5, jackpot: 50, label: '₹10 Ticket', color: '#818cf8' },
+            STANDARD_50: { price: 50, odds: 0.3, jackpot: 300, label: '₹50 Ticket', color: '#ec4899' },
+            PREMIUM_100: { price: 100, odds: 0.15, jackpot: 800, label: '₹100 Ticket', color: '#f59e0b' },
+            DELUXE_500: { price: 500, odds: 0.08, jackpot: 5000, label: '₹500 Ticket', color: '#10b981' },
+            MEGA_1000: { price: 1000, odds: 0.03, jackpot: 20000, label: '₹1000 Ticket', color: '#ef4444' }
+        };
+
+        const QUESTS = [
+            { id: 'earn_1k', title: 'Earn ₹1,000', description: 'Complete jobs to earn money', progress: 0, target: 1000, reward: 100, icon: '💰' },
+            { id: 'level_5', title: 'Reach Level 5', description: 'Gain XP to level up', progress: 0, target: 5, reward: 200, icon: '📈' },
+            { id: 'wash_10', title: 'Wash 10 Plates', description: 'Complete 10 dish washing jobs', progress: 0, target: 10, reward: 150, icon: '🍽️' },
+            { id: 'lottery_5', title: 'Buy 5 Lottery Tickets', description: 'Try your luck 5 times', progress: 0, target: 5, reward: 250, icon: '🎰' }
+        ];
+
+        const SHOP_ITEMS = [
+            { id: 'theme_dark', name: 'Dark Theme', price: 100, icon: '🌙', type: 'theme', purchased: true },
+            { id: 'theme_neon', name: 'Neon Theme', price: 200, icon: '⚡', type: 'theme', purchased: false },
+            { id: 'booster_2x', name: '2x Money Boost', price: 500, icon: '🚀', type: 'booster', purchased: false },
+            { id: 'booster_xp', name: '2x XP Boost', price: 500, icon: '⭐', type: 'booster', purchased: false }
+        ];
+
+        // Game state
+        const gameState = {
+            money: 1000,
+            gems: 50,
+            level: 1,
+            xp: 0,
+            xpNeeded: 100,
+            currentJob: 0,
+            jobLevels: {},
+            totalEarned: 0,
+            totalXP: 0,
+            platesWashed: 0,
+            lotteryTicketsBought: 0,
+            questProgress: {},
+            completedQuests: [],
+            purchasedItems: ['theme_dark'],
+            lastSaveTime: Date.now(),
+            offlineEarnings: 0
+        };
+
+        // UI References
+        const elements = {
+            moneyDisplay: document.getElementById('money-display'),
+            gemsDisplay: document.getElementById('gems-display'),
+            levelDisplay: document.getElementById('level-display'),
+            xpDisplay: document.getElementById('xp-display'),
+            xpMaxDisplay: document.getElementById('xp-max-display'),
+            xpBarFill: document.getElementById('xp-bar-fill'),
+            screens: document.querySelectorAll('.screen'),
+            navItems: document.querySelectorAll('.nav-item'),
+            jobSelector: document.getElementById('job-selector'),
+            plateCanvas: document.getElementById('plate-canvas'),
+            canvasContainer: document.getElementById('canvas-container'),
+            minigameContainer: document.getElementById('minigame-container'),
+            backButton: document.getElementById('back-button'),
+            continueButton: document.getElementById('continue-button'),
+            rewardModal: document.getElementById('reward-modal'),
+            notificationContainer: document.getElementById('notification-container'),
+            particleContainer: document.getElementById('particle-container'),
+            lotteryGrid: document.getElementById('lottery-grid'),
+            questsList: document.getElementById('quests-list'),
+            shopContent: document.getElementById('shop-content'),
+            profileLevel: document.getElementById('profile-level'),
+            profileTotalMoney: document.getElementById('profile-total-money'),
+            profileTotalXP: document.getElementById('profile-total-xp'),
+            profileJobLevel: document.getElementById('profile-job-level'),
+            profileAchievements: document.getElementById('profile-achievements'),
+            saveButton: document.getElementById('save-button'),
+            resetButton: document.getElementById('reset-button')
+        };
+
+        // Plate washing game state
+        let plateGame = {
+            currentPlate: null,
+            isWashing: false,
+            sessionMoney: 0,
+            sessionXP: 0,
+            sessionPlates: 0
+        };
+
+        // ===== UTILITY FUNCTIONS =====
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+
+        function showNotification(message, icon = '✨') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <span class="notification-icon">${icon}</span>
+                <div class="notification-content">${message}</div>
+            `;
+            elements.notificationContainer.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('out');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function createParticle(x, y, emoji = '✨', type = 'float') {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.textContent = emoji;
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+
+            if (type === 'float') {
+                const tx = (Math.random() - 0.5) * 100;
+                const ty = -100 - Math.random() * 50;
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+                particle.style.animation = `floatUp ${0.6 + Math.random() * 0.4}s ease-out forwards`;
+            } else if (type === 'confetti') {
+                const tx = (Math.random() - 0.5) * 200;
+                const ty = Math.random() * 200 + 100;
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+                particle.style.animation = `confetti ${1 + Math.random() * 0.5}s ease-out forwards`;
+            }
+
+            elements.particleContainer.appendChild(particle);
+            setTimeout(() => particle.remove(), 1000);
+        }
+
+        function addMoney(amount) {
+            gameState.money += amount;
+            gameState.totalEarned += amount;
+            plateGame.sessionMoney += amount;
+            updateHUD();
+            showNotification(`+₹${formatNumber(amount)}`, '💰');
+            createParticle(elements.moneyDisplay.getBoundingClientRect().left, 60, '💰');
+        }
+
+        function addXP(amount) {
+            gameState.xp += amount;
+            gameState.totalXP += amount;
+            plateGame.sessionXP += amount;
+            
+            while (gameState.xp >= gameState.xpNeeded) {
+                gameState.xp -= gameState.xpNeeded;
+                gameState.level += 1;
+                gameState.xpNeeded = Math.floor(gameState.xpNeeded * 1.1);
+                showNotification(`Level Up! Level ${gameState.level}`, '📈');
+                createConfetti();
+                checkLotteryUnlock();
+            }
+            updateHUD();
+        }
+
+        function updateHUD() {
+            elements.moneyDisplay.textContent = formatNumber(gameState.money);
+            elements.gemsDisplay.textContent = formatNumber(gameState.gems);
+            elements.levelDisplay.textContent = gameState.level;
+            elements.xpDisplay.textContent = gameState.xp;
+            elements.xpMaxDisplay.textContent = gameState.xpNeeded;
+            elements.xpBarFill.style.width = (gameState.xp / gameState.xpNeeded * 100) + '%';
+
+            // Update profile
+            elements.profileLevel.textContent = `Level ${gameState.level}`;
+            elements.profileTotalMoney.textContent = `₹${formatNumber(gameState.totalEarned)}`;
+            elements.profileTotalXP.textContent = formatNumber(gameState.totalXP);
+            elements.profileJobLevel.textContent = gameState.level;
+            elements.profileAchievements.textContent = gameState.completedQuests.length;
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 20; i++) {
+                const x = Math.random() * window.innerWidth;
+                const y = window.innerHeight / 2;
+                createParticle(x, y, ['🎉', '✨', '⭐', '🎊'][Math.floor(Math.random() * 4)], 'confetti');
+            }
+        }
+
+        // ===== SCREEN MANAGEMENT =====
+        function switchScreen(screenName) {
+            elements.screens.forEach(screen => screen.classList.remove('active'));
+            elements.navItems.forEach(item => item.classList.remove('active'));
+            
+            document.getElementById(screenName + '-screen').classList.add('active');
+            document.querySelector(`[data-screen="${screenName}"]`).classList.add('active');
+
+            if (screenName === 'work') {
+                renderJobs();
+            } else if (screenName === 'lottery') {
+                renderLottery();
+            } else if (screenName === 'quests') {
+                renderQuests();
+            } else if (screenName === 'shop') {
+                renderShop();
+            } else if (screenName === 'profile') {
+                updateHUD();
+            }
+        }
+
+        // ===== JOB SYSTEM =====
+        function renderJobs() {
+            elements.jobSelector.innerHTML = '';
+            
+            Object.values(JOBS).forEach(job => {
+                const isUnlocked = gameState.level >= job.unlockLevel;
+                const button = document.createElement('button');
+                button.className = 'job-button' + (gameState.currentJob === job.id ? ' active' : '');
+                button.disabled = !isUnlocked;
+                button.innerHTML = `
+                    <div>${job.icon}</div>
+                    <div style="margin-top: 4px;">${job.name}</div>
+                    ${!isUnlocked ? `<div class="job-label">Level ${job.unlockLevel}</div>` : ''}
+                `;
+                button.addEventListener('click', () => startJob(job.id));
+                elements.jobSelector.appendChild(button);
+            });
+        }
+
+        function startJob(jobId) {
+            gameState.currentJob = jobId;
+            plateGame.sessionMoney = 0;
+            plateGame.sessionXP = 0;
+            plateGame.sessionPlates = 0;
+
+            elements.minigameContainer.style.display = 'flex';
+            elements.jobSelector.style.display = 'none';
+
+            if (JOBS[Object.keys(JOBS)[jobId]].minigame === 'washPlates') {
+                startPlateWashing();
+            }
+
+            renderJobs();
+        }
+
+        function backToJobSelect() {
+            elements.minigameContainer.style.display = 'none';
+            elements.jobSelector.style.display = 'grid';
+            renderJobs();
+        }
+
+        // ===== PLATE WASHING MINIGAME =====
+        function startPlateWashing() {
+            setupPlateCanvas();
+            generatePlate();
+        }
+
+        function setupPlateCanvas() {
+            const container = elements.canvasContainer;
+            const rect = container.getBoundingClientRect();
+            
+            elements.plateCanvas.width = container.clientWidth;
+            elements.plateCanvas.height = container.clientHeight;
+
+            elements.plateCanvas.addEventListener('mousemove', handlePlateMouseMove);
+            elements.plateCanvas.addEventListener('mousedown', () => plateGame.isWashing = true);
+            elements.plateCanvas.addEventListener('mouseup', () => plateGame.isWashing = false);
+            elements.plateCanvas.addEventListener('mouseleave', () => plateGame.isWashing = false);
+            elements.plateCanvas.addEventListener('touchmove', handlePlateTouchMove, false);
+            elements.plateCanvas.addEventListener('touchstart', () => plateGame.isWashing = true);
+            elements.plateCanvas.addEventListener('touchend', () => plateGame.isWashing = false);
+        }
+
+        function handlePlateMouseMove(e) {
+            if (!plateGame.currentPlate || !plateGame.isWashing) return;
+            const rect = elements.plateCanvas.getBoundingClientRect();
+            scrubPlate(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function handlePlateTouchMove(e) {
+            if (!plateGame.currentPlate || !plateGame.isWashing) return;
+            e.preventDefault();
+            const rect = elements.plateCanvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            scrubPlate(touch.clientX - rect.left, touch.clientY - rect.top);
+        }
+
+        function generatePlate() {
+            const plateRadius = 80;
+            const centerX = elements.plateCanvas.width / 2;
+            const centerY = elements.plateCanvas.height / 2;
+
+            plateGame.currentPlate = {
+                x: centerX,
+                y: centerY,
+                radius: plateRadius,
+                cleanliness: 0,
+                stains: []
+            };
+
+            // Generate random stains
+            for (let i = 0; i < 3 + Math.floor(Math.random() * 3); i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * plateRadius * 0.6;
+                plateGame.currentPlate.stains.push({
+                    x: centerX + Math.cos(angle) * distance,
+                    y: centerY + Math.sin(angle) * distance,
+                    radius: 15 + Math.random() * 15,
+                    type: ['grease', 'burnt', 'food'][Math.floor(Math.random() * 3)],
+                    cleanliness: 0
+                });
+            }
+
+            drawPlate();
+        }
+
+        function scrubPlate(x, y) {
+            if (!plateGame.currentPlate) return;
+
+            const brushRadius = 20;
+            let totalCleaned = 0;
+
+            plateGame.currentPlate.stains.forEach(stain => {
+                const dist = Math.hypot(x - stain.x, y - stain.y);
+                if (dist < brushRadius + stain.radius) {
+                    const effort = (1 - dist / (brushRadius + stain.radius)) * 5;
+                    stain.cleanliness += effort;
+                    if (stain.cleanliness > 100) stain.cleanliness = 100;
+                    totalCleaned += effort;
+                }
+            });
+
+            if (totalCleaned > 0) {
+                createParticle(x, y, ['💧', '✨', '🧽'][Math.floor(Math.random() * 3)]);
+                plateGame.currentPlate.cleanliness = plateGame.currentPlate.stains.reduce((a, b) => a + b.cleanliness, 0) / plateGame.currentPlate.stains.length;
+            }
+
+            if (plateGame.currentPlate.cleanliness >= 100) {
+                completePlate();
+            }
+
+            drawPlate();
+        }
+
+        function completePlate() {
+            plateGame.sessionPlates += 1;
+            
+            const moneyReward = 50 + Math.floor(Math.random() * 50);
+            const xpReward = 25 + Math.floor(Math.random() * 25);
+
+            addMoney(moneyReward);
+            addXP(xpReward);
+
+            // Update quest progress
+            updateQuestProgress('wash_10', 1);
+            updateQuestProgress('earn_1k', moneyReward);
+
+            // Show reward modal
+            document.getElementById('reward-text').textContent = `₹${moneyReward} + ${xpReward} XP earned!`;
+            elements.rewardModal.classList.add('active');
+
+            // Update session stats
+            updateSessionStats();
+
+            createConfetti();
+        }
+
+        function updateSessionStats() {
+            document.getElementById('earned-money').textContent = `₹${plateGame.sessionMoney}`;
+            document.getElementById('earned-xp').textContent = plateGame.sessionXP;
+            document.getElementById('plates-washed').textContent = plateGame.sessionPlates;
+        }
+
+        function drawPlate() {
+            const ctx = elements.plateCanvas.getContext('2d');
+            ctx.clearRect(0, 0, elements.plateCanvas.width, elements.plateCanvas.height);
+
+            if (!plateGame.currentPlate) return;
+
+            const plate = plateGame.currentPlate;
+
+            // Draw plate
+            ctx.fillStyle = '#f5f5f5';
+            ctx.beginPath();
+            ctx.arc(plate.x, plate.y, plate.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw rim
+            ctx.strokeStyle = '#d0d0d0';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(plate.x, plate.y, plate.radius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Draw stains
+            plate.stains.forEach(stain => {
+                const cleanliness = stain.cleanliness;
+                const stainAlpha = Math.max(0, 1 - cleanliness / 100);
+
+                // Stain color based on type
+                let stainColor;
+                if (stain.type === 'grease') {
+                    ctx.fillStyle = `rgba(139, 120, 93, ${stainAlpha * 0.7})`;
+                } else if (stain.type === 'burnt') {
+                    ctx.fillStyle = `rgba(80, 50, 30, ${stainAlpha * 0.8})`;
+                } else {
+                    ctx.fillStyle = `rgba(200, 100, 50, ${stainAlpha * 0.6})`;
+                }
+
+                ctx.beginPath();
+                ctx.arc(stain.x, stain.y, stain.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw stain border
+                ctx.strokeStyle = `rgba(100, 60, 30, ${stainAlpha * 0.4})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw cleanliness indicator
+                if (cleanliness > 0) {
+                    ctx.fillStyle = `rgba(16, 185, 129, ${Math.min(0.5, cleanliness / 100 * 0.5)})`;
+                    ctx.beginPath();
+                    ctx.arc(stain.x, stain.y, stain.radius * (cleanliness / 100), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Update cleanliness percentage
+            document.getElementById('cleanliness-percent').textContent = Math.floor(plateGame.currentPlate.cleanliness);
+            document.getElementById('cleanliness-fill').style.width = plateGame.currentPlate.cleanliness + '%';
+        }
+
+        // ===== LOTTERY SYSTEM =====
+        function renderLottery() {
+            elements.lotteryGrid.innerHTML = '';
+
+            Object.entries(LOTTERY_TICKETS).forEach(([key, ticket]) => {
+                const isUnlocked = gameState.level >= 5;
+                const card = document.createElement('div');
+                card.className = 'lottery-card' + (isUnlocked ? ' unlocked' : ' locked');
+                card.innerHTML = `
+                    <div class="ticket-price">${ticket.label}</div>
+                    <div class="ticket-odds">Win Rate: ${(ticket.odds * 100).toFixed(1)}%</div>
+                    <div class="ticket-jackpot">Max Win: ₹${formatNumber(ticket.jackpot)}</div>
+                    ${isUnlocked ? `<div class="jackpot-badge">Available</div>` : `<div class="locked-badge">Level 5+</div>`}
+                `;
+
+                if (isUnlocked && gameState.money >= ticket.price) {
+                    card.style.cursor = 'pointer';
+                    card.addEventListener('click', () => playLottery(ticket));
+                }
+
+                elements.lotteryGrid.appendChild(card);
+            });
+        }
+
+        function playLottery(ticket) {
+            if (gameState.money < ticket.price) {
+                showNotification('Not enough money!', '❌');
+                return;
+            }
+
+            gameState.money -= ticket.price;
+            gameState.lotteryTicketsBought += 1;
+            updateQuestProgress('lottery_5', 1);
+            updateHUD();
+
+            const won = Math.random() < ticket.odds;
+            const winAmount = won ? ticket.jackpot : 0;
+
+            if (won) {
+                gameState.money += winAmount;
+                addXP(50);
+                showNotification(`🎉 Won ₹${formatNumber(winAmount)}!`, '🎉');
+                createConfetti();
+            } else {
+                showNotification('Better luck next time!', '😢');
+            }
+
+            updateHUD();
+        }
+
+        function checkLotteryUnlock() {
+            if (gameState.level === 5) {
+                showNotification('Lottery Unlocked!', '🎰');
+            }
+        }
+
+        // ===== QUEST SYSTEM =====
+        function renderQuests() {
+            elements.questsList.innerHTML = '';
+
+            QUESTS.forEach(quest => {
+                const progress = gameState.questProgress[quest.id] || 0;
+                const isCompleted = gameState.completedQuests.includes(quest.id);
+                const progressPercent = Math.min(100, progress / quest.target * 100);
+
+                const card = document.createElement('div');
+                card.className = 'quest-card';
+                card.innerHTML = `
+                    <div class="quest-icon">${quest.icon}</div>
+                    <div class="quest-content" style="flex: 1;">
+                        <div class="quest-title">${quest.title}</div>
+                        <div class="quest-description">${quest.description}</div>
+                        <div class="quest-progress">
+                            <div class="quest-progress-fill" style="width: ${progressPercent}%"></div>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                            ${progress}/${quest.target}
+                        </div>
+                    </div>
+                    <div class="quest-reward">+${quest.reward} XP</div>
+                `;
+
+                if (!isCompleted && progress >= quest.target) {
+                    const completeButton = document.createElement('button');
+                    completeButton.className = 'quest-button';
+                    completeButton.textContent = 'Claim';
+                    completeButton.addEventListener('click', () => completeQuest(quest.id, quest.reward));
+                    card.appendChild(completeButton);
+                } else if (isCompleted) {
+                    card.style.opacity = '0.6';
+                }
+
+                elements.questsList.appendChild(card);
+            });
+        }
+
+        function updateQuestProgress(questId, amount) {
+            if (!gameState.questProgress[questId]) {
+                gameState.questProgress[questId] = 0;
+            }
+            gameState.questProgress[questId] += amount;
+            renderQuests();
+        }
+
+        function completeQuest(questId, reward) {
+            if (gameState.completedQuests.includes(questId)) return;
+
+            gameState.completedQuests.push(questId);
+            addXP(reward);
+            showNotification(`Quest Complete! +${reward} XP`, '⭐');
+            renderQuests();
+        }
+
+        // ===== SHOP SYSTEM =====
+        function renderShop() {
+            elements.shopContent.innerHTML = '';
+
+            // Group items by type
+            const themes = SHOP_ITEMS.filter(i => i.type === 'theme');
+            const boosters = SHOP_ITEMS.filter(i => i.type === 'booster');
+
+            const createCategoryHTML = (category, items) => {
+                const html = document.createElement('div');
+                html.className = 'shop-category';
+                html.innerHTML = `<div class="shop-category-title">${category}</div>`;
+
+                const grid = document.createElement('div');
+                grid.className = 'shop-items';
+
+                items.forEach(item => {
+                    const isPurchased = gameState.purchasedItems.includes(item.id);
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'shop-item' + (isPurchased ? ' purchased' : '');
+                    itemEl.innerHTML = `
+                        <div class="item-icon">${item.icon}</div>
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price">💎 ${item.price}</div>
+                        <div class="item-status">${isPurchased ? 'Owned' : 'Available'}</div>
+                    `;
+
+                    if (!isPurchased && gameState.gems >= item.price) {
+                        itemEl.style.cursor = 'pointer';
+                        itemEl.addEventListener('click', () => buyItem(item));
+                    } else if (!isPurchased) {
+                        itemEl.style.opacity = '0.6';
+                    }
+
+                    grid.appendChild(itemEl);
+                });
+
+                html.appendChild(grid);
+                return html;
+            };
+
+            elements.shopContent.appendChild(createCategoryHTML('Themes', themes));
+            elements.shopContent.appendChild(createCategoryHTML('Boosters', boosters));
+        }
+
+        function buyItem(item) {
+            if (gameState.gems < item.price) {
+                showNotification('Not enough gems!', '❌');
+                return;
+            }
+
+            gameState.gems -= item.price;
+            gameState.purchasedItems.push(item.id);
+            showNotification(`${item.name} purchased!`, '✨');
+            updateHUD();
+            renderShop();
+        }
+
+        // ===== SAVE & LOAD =====
+        function saveGame() {
+            const saveData = {
+                gameState,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('lotteryHustle_save', JSON.stringify(saveData));
+            showNotification('Game Saved!', '💾');
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('lotteryHustle_save');
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.assign(gameState, data.gameState);
+                
+                // Calculate offline earnings
+                const timePassed = Date.now() - data.timestamp;
+                const hoursOffline = timePassed / (1000 * 60 * 60);
+                if (hoursOffline > 0 && hoursOffline < 24) {
+                    const offlineEarnings = Math.floor(hoursOffline * 10);
+                    gameState.money += offlineEarnings;
+                    showNotification(`📱 You earned ₹${offlineEarnings} offline!`, '💰');
+                }
+
+                updateHUD();
+            }
+        }
+
+        function resetGame() {
+            if (confirm('Are you sure? This will reset all progress!')) {
+                localStorage.removeItem('lotteryHustle_save');
+                location.reload();
+            }
+        }
+
+        // ===== EVENT LISTENERS =====
+        function setupEventListeners() {
+            // Screen navigation
+            elements.navItems.forEach(item => {
+                item.addEventListener('click', () => switchScreen(item.dataset.screen));
+            });
+
+            // Minigame controls
+            elements.backButton.addEventListener('click', backToJobSelect);
+            elements.continueButton.addEventListener('click', () => {
+                elements.rewardModal.classList.remove('active');
+                generatePlate();
+                drawPlate();
+            });
+
+            // Profile actions
+            elements.saveButton.addEventListener('click', saveGame);
+            elements.resetButton.addEventListener('click', resetGame);
+
+            // Auto-save every 30 seconds
+            setInterval(saveGame, 30000);
+        }
+
+        // ===== INITIALIZATION =====
+        function init() {
+            loadGame();
+            updateHUD();
+            renderJobs();
+            setupEventListeners();
+
+            // Welcome notification
+            setTimeout(() => {
+                showNotification('Welcome to Lottery Hustle!', '🎉');
+            }, 500);
+        }
+
+        // Start the game
+        init();
+    </script>
+</body>
+</html>
+
