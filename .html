@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Fortune Hustle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --bg:#0A0A0A;--bg2:#111;--card:#151515;--card2:#1C1C1C;--border:#222;
+  --gold:#E8A838;--gold-b:#FFD700;--gold-d:#B8860B;
+  --green:#22C55E;--teal:#14B8A6;--red:#EF4444;--pink:#F472B6;
+  --text:#F5F5F5;--muted:#777;--muted2:#444;
+  --radius:14px;--radius-sm:10px;--radius-xs:7px;
+  --nav-h:68px;--top-h:58px;
+  --font:'Outfit',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent;user-select:none}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--muted2);border-radius:4px}
+
+/* TOP BAR */
+#topBar{position:fixed;top:0;left:0;right:0;height:var(--top-h);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;z-index:100}
+.top-stat{display:flex;align-items:center;gap:5px;font-weight:700;font-size:14px;white-space:nowrap}
+.top-stat i{font-size:13px}
+.top-stat.money{color:var(--green)}
+.top-stat.gems{color:var(--teal)}
+.top-stat .val{min-width:32px}
+.xp-wrap{flex:1;display:flex;align-items:center;gap:8px;min-width:0}
+.xp-label{font-size:12px;font-weight:700;color:var(--gold);white-space:nowrap}
+.xp-bar-outer{flex:1;height:8px;background:var(--card);border-radius:8px;overflow:hidden;position:relative}
+.xp-bar-inner{height:100%;background:linear-gradient(90deg,var(--gold-d),var(--gold),var(--gold-b));border-radius:8px;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%}
+.streak-badge{display:flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:#FF6B35;background:rgba(255,107,53,.12);padding:3px 8px;border-radius:20px;white-space:nowrap}
+.streak-badge i{font-size:11px}
+
+/* MAIN CONTENT */
+#mainContent{position:fixed;top:var(--top-h);bottom:var(--nav-h);left:0;right:0;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth}
+.screen{display:none;padding:16px 14px 24px;min-height:100%;animation:fadeUp .3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* BOTTOM NAV */
+#bottomNav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--bg2);border-top:1px solid var(--border);display:flex;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;color:var(--muted);font-family:var(--font);font-size:10px;font-weight:600;cursor:pointer;transition:color .2s;position:relative}
+.nav-btn i{font-size:20px;transition:transform .2s}
+.nav-btn.active{color:var(--gold)}
+.nav-btn.active i{transform:scale(1.15)}
+.nav-btn.active::before{content:'';position:absolute;top:-1px;left:25%;right:25%;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
+.nav-btn:active i{transform:scale(.9)}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:transform .15s,box-shadow .15s}
+.card:active{transform:scale(.98)}
+.card-elevated{box-shadow:0 4px 24px rgba(0,0,0,.4)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-weight:700;cursor:pointer;transition:transform .12s,box-shadow .12s,opacity .15s;padding:12px 24px;font-size:15px}
+.btn:active{transform:scale(.95)}
+.btn-gold{background:linear-gradient(135deg,var(--gold-d),var(--gold),var(--gold-b));color:#1a1000;box-shadow:0 4px 20px rgba(232,168,56,.3)}
+.btn-gold:hover{box-shadow:0 6px 28px rgba(232,168,56,.45)}
+.btn-sm{padding:8px 16px;font-size:13px;border-radius:var(--radius-xs)}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-disabled{opacity:.4;pointer-events:none}
+.btn-block{width:100%}
+
+/* SECTION TITLES */
+.section-title{font-size:18px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title i{color:var(--gold);font-size:16px}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(232,168,56,.12);color:var(--gold)}
+.badge-green{background:rgba(34,197,94,.12);color:var(--green)}
+.badge-locked{background:rgba(255,255,255,.05);color:var(--muted2)}
+
+/* PROGRESS BAR */
+.progress-outer{height:6px;background:var(--card2);border-radius:6px;overflow:hidden}
+.progress-inner{height:100%;border-radius:6px;transition:width .4s ease}
+
+/* JOB GRID */
+.job-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.job-card{position:relative;overflow:hidden}
+.job-card.locked{opacity:.5}
+.job-card.locked .job-lock{display:flex}
+.job-lock{display:none;position:absolute;inset:0;background:rgba(10,10,10,.7);align-items:center;justify-content:center;font-size:24px;color:var(--muted2);z-index:2;border-radius:var(--radius)}
+.job-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:8px}
+.job-card.selected{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 4px 20px rgba(232,168,56,.15)}
+.job-name{font-size:13px;font-weight:700;margin-bottom:4px}
+.job-pay{font-size:11px;color:var(--green);font-weight:600}
+.job-req{font-size:10px;color:var(--muted);margin-top:4px}
+
+/* CURRENT JOB CARD */
+.current-job{background:linear-gradient(145deg,#1a1508,#151510);border:1px solid rgba(232,168,56,.2);border-radius:var(--radius);padding:20px;margin-bottom:6px}
+.current-job-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.cj-icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--gold-d),var(--gold));display:flex;align-items:center;justify-content:center;font-size:24px;color:#1a1000;flex-shrink:0}
+.cj-info{flex:1;min-width:0}
+.cj-name{font-size:20px;font-weight:800;line-height:1.2}
+.cj-level{font-size:12px;color:var(--muted);margin-top:2px}
+.cj-stats{display:flex;gap:16px;margin-bottom:16px}
+.cj-stat{text-align:center;flex:1}
+.cj-stat-val{font-size:18px;font-weight:800;color:var(--green)}
+.cj-stat-label{font-size:10px;color:var(--muted);margin-top:2px}
+.cj-xp{margin-bottom:16px}
+.cj-xp-label{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between}
+
+/* MINI-GAME OVERLAY */
+#miniGameOverlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column}
+#miniGameOverlay.active{display:flex}
+.mg-top{display:flex;align-items:center;padding:12px 14px;gap:12px;flex-shrink:0}
+.mg-back{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:18px;cursor:pointer}
+.mg-back:active{transform:scale(.9)}
+.mg-info{flex:1;text-align:center}
+.mg-title{font-size:16px;font-weight:800}
+.mg-subtitle{font-size:11px;color:var(--muted)}
+.mg-progress{display:flex;align-items:center;gap:10px;padding:0 14px 10px;flex-shrink:0}
+.mg-progress-bar{flex:1;height:10px;background:var(--card);border-radius:10px;overflow:hidden;position:relative}
+.mg-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),#4ADE80);border-radius:10px;transition:width .15s;position:relative}
+.mg-progress-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:30px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));border-radius:0 10px 10px 0}
+.mg-pct{font-size:16px;font-weight:900;min-width:48px;text-align:right;color:var(--green)}
+.mg-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.mg-canvas-wrap canvas{touch-action:none}
+.mg-reward{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,10,10,.85);z-index:10;opacity:0;pointer-events:none;transition:opacity .3s}
+.mg-reward.show{opacity:1;pointer-events:auto}
+.mg-reward-icon{font-size:48px;margin-bottom:12px}
+.mg-reward-amount{font-size:32px;font-weight:900}
+.mg-reward-xp{font-size:14px;color:var(--gold);font-weight:700;margin-top:4px}
+.mg-reward-btn{margin-top:20px}
+
+/* LOTTERY TABS */
+.lottery-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.lottery-tab{padding:8px 16px;border-radius:var(--radius-xs);background:var(--card);border:1px solid var(--border);color:var(--muted);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
+.lottery-tab.active{background:rgba(232,168,56,.12);border-color:var(--gold);color:var(--gold)}
+.lottery-panel{display:none}
+.lottery-panel.active{display:block}
+
+/* SCRATCH CARD */
+.scratch-container{position:relative;width:280px;height:180px;margin:0 auto;border-radius:var(--radius);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.scratch-prize{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1508,#0f1a08);border:2px solid var(--gold-d)}
+.scratch-prize-amount{font-size:36px;font-weight:900;color:var(--gold-b)}
+.scratch-prize-label{font-size:12px;color:var(--muted);margin-top:4px}
+#scratchCanvas{position:absolute;inset:0;cursor:crosshair}
+
+/* WHEEL */
+.wheel-container{position:relative;width:280px;height:280px;margin:0 auto}
+#wheelCanvas{width:280px;height:280px}
+.wheel-pointer{position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:28px solid var(--gold);filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));z-index:2}
+.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:var(--gold);border:3px solid var(--gold-b);display:flex;align-items:center;justify-content:center;font-size:16px;color:#1a1000;z-index:2;font-weight:900}
+
+/* TICKET LIST */
+.ticket-card{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px}
+.ticket-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ticket-info{flex:1;min-width:0}
+.ticket-name{font-size:14px;font-weight:700}
+.ticket-odds{font-size:11px;color:var(--muted)}
+.ticket-jackpot{font-size:13px;font-weight:800;color:var(--gold)}
+
+/* QUESTS */
+.quest-item{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px}
+.quest-icon{width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gold);flex-shrink:0}
+.quest-info{flex:1;min-width:0}
+.quest-name{font-size:13px;font-weight:700}
+.quest-progress{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* SHOP */
+.shop-item{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px}
+.shop-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.shop-info{flex:1;min-width:0}
+.shop-name{font-size:14px;font-weight:700}
+.shop-desc{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* PROFILE */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.stat-card{padding:14px;text-align:center}
+.stat-card .val{font-size:22px;font-weight:900}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* DAILY REWARD MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;max-width:360px;width:100%;animation:modalIn .3s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-size:20px;font-weight:900;text-align:center;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:18px}
+.daily-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:18px}
+.daily-day{text-align:center;padding:8px 4px;border-radius:var(--radius-xs);background:var(--card2);border:1px solid transparent;transition:all .2s}
+.daily-day.claimed{border-color:var(--green);background:rgba(34,197,94,.08)}
+.daily-day.current{border-color:var(--gold);background:rgba(232,168,56,.1);box-shadow:0 0 12px rgba(232,168,56,.2)}
+.daily-day-num{font-size:10px;color:var(--muted);font-weight:600}
+.daily-day-icon{font-size:18px;margin:4px 0}
+.daily-day-claimed{font-size:10px;color:var(--green);font-weight:700}
+.daily-day-amount{font-size:10px;font-weight:700;color:var(--gold)}
+
+/* NOTIFICATIONS */
+#notifContainer{position:fixed;top:calc(var(--top-h) + 8px);left:50%;transform:translateX(-50%);z-index:250;display:flex;flex-direction:column;gap:6px;pointer-events:none;width:90%;max-width:360px}
+.notif{padding:10px 16px;border-radius:var(--radius-sm);background:var(--card2);border:1px solid var(--border);font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;animation:notifIn .3s ease,notifOut .3s ease 2.2s forwards;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:auto}
+.notif.success{border-color:rgba(34,197,94,.3);color:var(--green)}
+.notif.gold{border-color:rgba(232,168,56,.3);color:var(--gold)}
+.notif.error{border-color:rgba(239,68,68,.3);color:var(--red)}
+@keyframes notifIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes notifOut{to{opacity:0;transform:translateY(-20px)}}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;width:8px;height:8px;z-index:400;pointer-events:none;animation:confettiFall 1.5s ease-out forwards}
+@keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(400px) rotate(720deg) scale(.3)}}
+
+/* FLOATING TEXT */
+.float-text{position:fixed;z-index:350;pointer-events:none;font-weight:900;font-size:20px;animation:floatUp 1.2s ease-out forwards}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}50%{opacity:1;transform:translateY(-40px) scale(1.1)}100%{opacity:0;transform:translateY(-80px) scale(.8)}}
+
+/* AD PLACEHOLDER */
+.ad-placeholder{background:var(--card2);border:1px dashed var(--muted2);border-radius:var(--radius-sm);padding:14px;text-align:center;color:var(--muted2);font-size:12px;cursor:pointer;margin-top:8px;transition:border-color .2s}
+.ad-placeholder:hover{border-color:var(--muted)}
+
+/* LEVEL UP FLASH */
+.level-up-flash{position:fixed;inset:0;z-index:500;pointer-events:none;background:radial-gradient(circle,rgba(232,168,56,.3),transparent 70%);animation:flashPulse .8s ease-out forwards}
+@keyframes flashPulse{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+
+/* STAIN INDICATOR */
+.stain-indicators{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 8px}
+.stain-tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;display:flex;align-items:center;gap:4px}
+
+/* RESPONSIVE */
+@media(min-width:500px){
+  .job-grid{grid-template-columns:repeat(3,1fr)}
+  .stat-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(min-width:768px){
+  #mainContent{max-width:500px;margin:0 auto}
+  #topBar,#bottomNav{max-width:500px;left:50%;transform:translateX(-50%)}
+  #topBar{border-radius:0 0 12px 12px}
+  #bottomNav{border-radius:12px 12px 0 0}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header id="topBar">
+  <div class="top-stat money"><i class="fa-solid fa-indian-rupee-sign"></i><span class="val" id="moneyVal">0</span></div>
+  <div class="top-stat gems"><i class="fa-solid fa-gem"></i><span class="val" id="gemsVal">0</span></div>
+  <div class="xp-wrap">
+    <span class="xp-label">Lv.<span id="levelVal">1</span></span>
+    <div class="xp-bar-outer"><div class="xp-bar-inner" id="xpBar"></div></div>
+  </div>
+  <div class="streak-badge" id="streakBadge" style="display:none"><i class="fa-solid fa-fire"></i><span id="streakVal">0</span></div>
+</header>
+
+<!-- MAIN CONTENT -->
+<div id="mainContent">
+
+  <!-- WORK SCREEN -->
+  <section id="workScreen" class="screen active"></section>
+
+  <!-- LOTTERY SCREEN -->
+  <section id="lotteryScreen" class="screen"></section>
+
+  <!-- QUESTS SCREEN -->
+  <section id="questsScreen" class="screen"></section>
+
+  <!-- SHOP SCREEN -->
+  <section id="shopScreen" class="screen"></section>
+
+  <!-- PROFILE SCREEN -->
+  <section id="profileScreen" class="screen"></section>
+
+</div>
+
+<!-- MINI-GAME OVERLAY -->
+<div id="miniGameOverlay">
+  <div class="mg-top">
+    <div class="mg-back" id="mgBack"><i class="fa-solid fa-xmark"></i></div>
+    <div class="mg-info">
+      <div class="mg-title" id="mgTitle">Dish Washing</div>
+      <div class="mg-subtitle" id="mgSubtitle">Scrub away the dirt!</div>
+    </div>
+    <div class="badge" id="mgBadge">₹10</div>
+  </div>
+  <div class="mg-progress" id="mgProgressWrap">
+    <div class="mg-progress-bar"><div class="mg-progress-fill" id="mgProgressFill" style="width:0%"></div></div>
+    <div class="mg-pct" id="mgPct">0%</div>
+  </div>
+  <div class="stain-indicators" id="stainIndicators"></div>
+  <div class="mg-canvas-wrap" id="mgCanvasWrap"></div>
+  <div class="mg-reward" id="mgReward">
+    <div class="mg-reward-icon" id="rewardIcon"><i class="fa-solid fa-check-circle" style="color:var(--green)"></i></div>
+    <div class="mg-reward-amount" id="rewardAmount" style="color:var(--green)">+₹10</div>
+    <div class="mg-reward-xp" id="rewardXP">+15 XP</div>
+    <div class="ad-placeholder" id="rewardAd" style="width:200px"><i class="fa-solid fa-play-circle"></i> Watch Ad for 2x Reward</div>
+    <button class="btn btn-gold mg-reward-btn" id="rewardNext">Next Plate</button>
+  </div>
+</div>
+
+<!-- DAILY REWARD MODAL -->
+<div class="modal-overlay" id="dailyModal">
+  <div class="modal">
+    <div class="modal-title">Daily Rewards</div>
+    <div class="modal-sub">Login each day for bigger rewards!</div>
+    <div class="daily-grid" id="dailyGrid"></div>
+    <button class="btn btn-gold btn-block" id="dailyClaimBtn">Claim Reward</button>
+    <button class="btn btn-outline btn-block" style="margin-top:8px" id="dailyCloseBtn">Close</button>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div id="notifContainer"></div>
+
+<!-- BOTTOM NAV -->
+<nav id="bottomNav">
+  <button class="nav-btn active" data-screen="workScreen"><i class="fa-solid fa-briefcase"></i>Work</button>
+  <button class="nav-btn" data-screen="lotteryScreen"><i class="fa-solid fa-ticket"></i>Lottery</button>
+  <button class="nav-btn" data-screen="questsScreen"><i class="fa-solid fa-list-check"></i>Quests</button>
+  <button class="nav-btn" data-screen="shopScreen"><i class="fa-solid fa-bag-shopping"></i>Shop</button>
+  <button class="nav-btn" data-screen="profileScreen"><i class="fa-solid fa-user"></i>Profile</button>
+</nav>
+
+<script>
+/* ============================================================
+   FORTUNE HUSTLE — Complete Game Engine
+   ============================================================ */
+
+// ============ CONFIGURATION ============
+
+const JOBS = {
+  dishwasher:  { name:'Dish Washer',      unlock:1,  pay:10,  xp:15,  icon:'fa-plate-wheat',      color:'#8B6914', colorBg:'rgba(139,105,20,.15)' },
+  cleaner:     { name:'Restaurant Cleaner', unlock:5,  pay:28,  xp:25,  icon:'fa-broom',            color:'#4A9E6F', colorBg:'rgba(74,158,111,.15)' },
+  grocery:     { name:'Grocery Worker',    unlock:12, pay:55,  xp:40,  icon:'fa-basket-shopping',  color:'#C2662D', colorBg:'rgba(194,102,45,.15)' },
+  delivery:    { name:'Delivery Rider',    unlock:20, pay:90,  xp:65,  icon:'fa-motorcycle',       color:'#3B82C4', colorBg:'rgba(59,130,196,.15)' },
+  office:      { name:'Office Worker',     unlock:30, pay:160, xp:110, icon:'fa-laptop',           color:'#7C6DB0', colorBg:'rgba(124,109,176,.15)' },
+  manager:     { name:'Shop Manager',      unlock:42, pay:320, xp:200, icon:'fa-store',            color:'#B8860B', colorBg:'rgba(184,134,11,.15)' },
+  owner:       { name:'Business Owner',    unlock:58, pay:850, xp:450, icon:'fa-building',         color:'#D4AF37', colorBg:'rgba(212,175,55,.15)' }
+};
+
+const STAIN_TYPES = {
+  regular: { name:'Food Stain', color:'rgba(120,60,20,0.7)',  colorMid:'rgba(100,50,15,0.3)', opacity:0.7, difficulty:1,   tagColor:'#8B4513', tagBg:'rgba(139,69,19,.15)' },
+  sauce:   { name:'Sauce',      color:'rgba(160,20,20,0.65)', colorMid:'rgba(130,10,10,0.25)',opacity:0.65,difficulty:1.2, tagColor:'#DC2626', tagBg:'rgba(220,38,38,.15)' },
+  grease:  { name:'Grease',     color:'rgba(180,160,40,0.5)', colorMid:'rgba(160,140,30,0.2)',opacity:0.55,difficulty:1.5, tagColor:'#CA8A04', tagBg:'rgba(202,138,4,.15)' },
+  burnt:   { name:'Burnt',      color:'rgba(30,30,30,0.8)',   colorMid:'rgba(20,20,20,0.4)',  opacity:0.8, difficulty:2.2, tagColor:'#525252', tagBg:'rgba(82,82,82,.15)' }
+};
+
+const STAIN_KEYS = Object.keys(STAIN_TYPES);
+
+const LOTTERY_TICKETS = [
+  { name:'Bronze Ticket',  cost:10,   jackpot:100,   odds:0.25, color:'#CD7F32', icon:'fa-ticket' },
+  { name:'Silver Ticket',  cost:50,   jackpot:800,   odds:0.15, color:'#C0C0C0', icon:'fa-ticket' },
+  { name:'Gold Ticket',    cost:100,  jackpot:2500,  odds:0.08, color:'#FFD700', icon:'fa-ticket' },
+  { name:'Diamond Ticket', cost:500,  jackpot:20000, odds:0.03, color:'#14B8A6', icon:'fa-gem' },
+  { name:'Platinum Ticket',cost:1000, jackpot:100000,odds:0.01, color:'#E5E4E2', icon:'fa-crown' }
+];
+
+const WHEEL_SEGMENTS = [
+  { label:'₹5',     value:5,     color:'#1a3a1a' },
+  { label:'₹20',    value:20,    color:'#1a2a3a' },
+  { label:'₹2',     value:2,     color:'#3a1a1a' },
+  { label:'₹50',    value:50,    color:'#2a2a1a' },
+  { label:'₹1',     value:1,     color:'#1a1a3a' },
+  { label:'₹100',   value:100,   color:'#3a2a1a' },
+  { label:'₹3',     value:3,     color:'#1a3a2a' },
+  { label:'₹500',   value:500,   color:'#3a1a2a' }
+];
+
+const DAILY_REWARDS = [
+  { day:1, money:5,   gems:0, icon:'fa-indian-rupee-sign' },
+  { day:2, money:10,  gems:0, icon:'fa-indian-rupee-sign' },
+  { day:3, money:20,  gems:1, icon:'fa-gem' },
+  { day:4, money:30,  gems:0, icon:'fa-indian-rupee-sign' },
+  { day:5, money:50,  gems:2, icon:'fa-gem' },
+  { day:6, money:80,  gems:0, icon:'fa-indian-rupee-sign' },
+  { day:7, money:200, gems:5, icon:'fa-crown' }
+];
+
+const QUESTS = [
+  { id:'clean5',    name:'Clean 5 Plates',      target:5,    reward:20,  type:'plates',  icon:'fa-plate-wheat' },
+  { id:'earn100',   name:'Earn ₹100',            target:100,  reward:30,  type:'money',   icon:'fa-indian-rupee-sign' },
+  { id:'level3',    name:'Reach Level 3',        target:3,    reward:50,  type:'level',   icon:'fa-arrow-up' },
+  { id:'lottery3',  name:'Play Lottery 3 Times', target:3,    reward:25,  type:'lottery', icon:'fa-ticket' },
+  { id:'clean20',   name:'Clean 20 Plates',     target:20,   reward:80,  type:'plates',  icon:'fa-plate-wheat' },
+  { id:'earn500',   name:'Earn ₹500',            target:500,  reward:100, type:'money',   icon:'fa-indian-rupee-sign' },
+  { id:'streak3',   name:'3-Day Streak',         target:3,    reward:40,  type:'streak',  icon:'fa-fire' },
+  { id:'level10',   name:'Reach Level 10',       target:10,   reward:200, type:'level',   icon:'fa-arrow-up' }
+];
+
+const SHOP_ITEMS = [
+  { id:'x2earn',   name:'2x Earnings',     desc:'Double your job pay for 5 minutes', cost:5,  currency:'gems', icon:'fa-bolt',       color:'#E8A838', colorBg:'rgba(232,168,56,.12)' },
+  { id:'autoclean', name:'Auto-Clean',      desc:'Automatically clean 50% of next plate', cost:3, currency:'gems', icon:'fa-wand-magic-sparkles', color:'#14B8A6', colorBg:'rgba(20,184,166,.12)' },
+  { id:'gem10',    name:'10 Gems',          desc:'Purchase 10 gems', cost:500, currency:'money', icon:'fa-gem', color:'#14B8A6', colorBg:'rgba(20,184,166,.12)' },
+  { id:'gem50',    name:'50 Gems',          desc:'Purchase 50 gems', cost:2000,currency:'money', icon:'fa-gem', color:'#F472B6', colorBg:'rgba(244,114,182,.12)' },
+  { id:'lucky',    name:'Lucky Boost',      desc:'10% better lottery odds for 10 min', cost:8, currency:'gems', icon:'fa-clover', color:'#22C55E', colorBg:'rgba(34,197,94,.12)' }
+];
+
+// ============ GAME STATE ============
+
+let GS = {
+  money: 0, gems: 0, level: 1, xp: 0, xpToNext: 100,
+  currentJob: 'dishwasher',
+  unlockedJobs: ['dishwasher'],
+  jobLevels: { dishwasher: 1 },
+  jobXP: { dishwasher: 0 },
+  totalPlates: 0, totalEarned: 0, totalLottery: 0, totalSpent: 0,
+  streak: 0, lastLogin: null, dailyDay: 0, dailyClaimed: false,
+  questProgress: {}, questsClaimed: [],
+  shopPurchases: {},
+  boosters: { x2earn: 0, autoclean: false, lucky: 0 },
+  settings: { sound: true },
+  prestige: 0
+};
+
+// ============ SAVE / LOAD ============
+
+function saveGame() {
+  try { localStorage.setItem('fortuneHustle', JSON.stringify(GS)); } catch(e) {}
+}
+
+function loadGame() {
+  try {
+    const d = JSON.parse(localStorage.getItem('fortuneHustle'));
+    if (d) {
+      // Merge with defaults to handle new fields
+      for (let k in GS) { if (d[k] !== undefined) GS[k] = d[k]; }
+      // Ensure nested objects exist
+      if (!GS.jobLevels) GS.jobLevels = {};
+      if (!GS.jobXP) GS.jobXP = {};
+      if (!GS.questProgress) GS.questProgress = {};
+      if (!GS.questsClaimed) GS.questsClaimed = [];
+      if (!GS.shopPurchases) GS.shopPurchases = {};
+      if (!GS.boosters) GS.boosters = { x2earn: 0, autoclean: false, lucky: 0 };
+      if (!GS.settings) GS.settings = { sound: true };
+    }
+  } catch(e) {}
+}
+
+// ============ AUDIO ENGINE ============
+
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playScrubSound(intensity) {
+  if (!GS.settings.sound) return;
+  try {
+    const ctx = getAudioCtx();
+    const dur = 0.04;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * intensity * 0.08;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filt = ctx.createBiquadFilter();
+    filt.type = 'bandpass';
+    filt.frequency.value = 500 + intensity * 600;
+    filt.Q.value = 1.5;
+    const gain = ctx.createGain();
+    gain.gain.value = Math.min(intensity * 0.5, 0.3);
+    src.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
+    src.start();
+  } catch(e) {}
+}
+
+function playSuccessSound() {
+  if (!GS.settings.sound) return;
+  try {
+    const ctx = getAudioCtx();
+    [523, 659, 784].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.12);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.3);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.3);
+    });
+  } catch(e) {}
+}
+
+function playSpinSound() {
+  if (!GS.settings.sound) return;
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = 200;
+    osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + 0.15);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.1, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.2);
+  } catch(e) {}
+}
+
+// ============ UI HELPERS ============
+
+function animateValue(el, start, end, duration, prefix='', suffix='') {
+  const range = end - start;
+  const startTime = performance.now();
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const val = Math.round(start + range * eased);
+    el.textContent = prefix + formatNum(val) + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+function formatNum(n) {
+  if (n >= 100000) return (n / 1000).toFixed(1) + 'K';
+  if (n >= 10000) return (n / 1000).toFixed(1) + 'K';
+  return n.toLocaleString('en-IN');
+}
+
+function updateHUD() {
+  const moneyEl = document.getElementById('moneyVal');
+  const gemsEl = document.getElementById('gemsVal');
+  const levelEl = document.getElementById('levelVal');
+  const xpBar = document.getElementById('xpBar');
+  const streakBadge = document.getElementById('streakBadge');
+  const streakVal = document.getElementById('streakVal');
+
+  const oldMoney = parseInt(moneyEl.textContent.replace(/,/g, '')) || 0;
+  const oldGems = parseInt(gemsEl.textContent.replace(/,/g, '')) || 0;
+
+  animateValue(moneyEl, oldMoney, Math.floor(GS.money), 400);
+  animateValue(gemsEl, oldGems, GS.gems, 300);
+  levelEl.textContent = GS.level;
+  xpBar.style.width = (GS.xp / GS.xpToNext * 100) + '%';
+
+  if (GS.streak > 0) {
+    streakBadge.style.display = 'flex';
+    streakVal.textContent = GS.streak;
+  } else {
+    streakBadge.style.display = 'none';
+  }
+}
+
+function showNotif(text, type='success') {
+  const container = document.getElementById('notifContainer');
+  const el = document.createElement('div');
+  el.className = 'notif ' + type;
+  const icons = { success:'fa-check-circle', gold:'fa-star', error:'fa-exclamation-circle' };
+  el.innerHTML = `<i class="fa-solid ${icons[type] || icons.success}"></i>${text}`;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 2600);
+}
+
+function showFloatText(x, y, text, color='var(--green)') {
+  const el = document.createElement('div');
+  el.className = 'float-text';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.style.color = color;
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1300);
+}
+
+function spawnConfetti(count=30) {
+  const colors = ['#FFD700','#E8A838','#22C55E','#14B8A6','#EF4444','#F472B6','#fff'];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = (20 + Math.random() * 60) + 'vw';
+    el.style.top = (10 + Math.random() * 20) + 'vh';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    el.style.width = (6 + Math.random() * 6) + 'px';
+    el.style.height = (6 + Math.random() * 6) + 'px';
+    el.style.animationDuration = (1 + Math.random() * 1) + 's';
+    el.style.animationDelay = (Math.random() * 0.3) + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+  }
+}
+
+function showLevelUpFlash() {
+  const el = document.createElement('div');
+  el.className = 'level-up-flash';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+// ============ XP & LEVELING ============
+
+function addXP(amount) {
+  GS.xp += amount;
+  while (GS.xp >= GS.xpToNext) {
+    GS.xp -= GS.xpToNext;
+    GS.level++;
+    GS.xpToNext = Math.floor(100 * Math.pow(1.35, GS.level - 1));
+    showLevelUpFlash();
+    spawnConfetti(20);
+    showNotif(`Level Up! You are now Level ${GS.level}`, 'gold');
+    checkJobUnlocks();
+  }
+  updateHUD();
+  saveGame();
+}
+
+function addMoney(amount) {
+  const mult = (GS.boosters.x2earn > Date.now()) ? 2 : 1;
+  GS.money += Math.floor(amount * mult);
+  GS.totalEarned += Math.floor(amount * mult);
+  updateHUD();
+  saveGame();
+}
+
+function checkJobUnlocks() {
+  let newUnlock = false;
+  for (let key in JOBS) {
+    if (!GS.unlockedJobs.includes(key) && GS.level >= JOBS[key].unlock) {
+      GS.unlockedJobs.push(key);
+      GS.jobLevels[key] = 1;
+      GS.jobXP[key] = 0;
+      newUnlock = true;
+      showNotif(`New Job Unlocked: ${JOBS[key].name}!`, 'gold');
+    }
+  }
+  if (newUnlock) { renderWorkScreen(); saveGame(); }
+}
+
+// ============ SCREEN MANAGEMENT ============
+
+function switchScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const screen = document.getElementById(screenId);
+  if (screen) screen.classList.add('active');
+  const btn = document.querySelector(`.nav-btn[data-screen="${screenId}"]`);
+  if (btn) btn.classList.add('active');
+
+  // Render screen content
+  if (screenId === 'workScreen') renderWorkScreen();
+  else if (screenId === 'lotteryScreen') renderLotteryScreen();
+  else if (screenId === 'questsScreen') renderQuestsScreen();
+  else if (screenId === 'shopScreen') renderShopScreen();
+  else if (screenId === 'profileScreen') renderProfileScreen();
+}
+
+// Bottom nav click handlers
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
+});
+
+// ============ WORK SCREEN ============
+
+function renderWorkScreen() {
+  const job = JOBS[GS.currentJob];
+  const jl = GS.jobLevels[GS.currentJob] || 1;
+  const jxp = GS.jobXP[GS.currentJob] || 0;
+  const jxpNext = 50 * jl;
+  const payMult = 1 + (jl - 1) * 0.15;
+
+  let html = `
+    <div class="current-job">
+      <div class="current-job-header">
+        <div class="cj-icon"><i class="fa-solid ${job.icon}"></i></div>
+        <div class="cj-info">
+          <div class="cj-name">${job.name}</div>
+          <div class="cj-level">Job Level ${jl}</div>
+        </div>
+      </div>
+      <div class="cj-stats">
+        <div class="cj-stat"><div class="cj-stat-val">₹${Math.floor(job.pay * payMult)}</div><div class="cj-stat-label">Per Plate</div></div>
+        <div class="cj-stat"><div class="cj-stat-val">+${Math.floor(job.xp * payMult)}</div><div class="cj-stat-label">XP Earned</div></div>
+        <div class="cj-stat"><div class="cj-stat-val">${GS.totalPlates}</div><div class="cj-stat-label">Total Cleaned</div></div>
+      </div>
+      <div class="cj-xp">
+        <div class="cj-xp-label"><span>Job XP</span><span>${jxp}/${jxpNext}</span></div>
+        <div class="progress-outer"><div class="progress-inner" style="width:${jxp/jxpNext*100}%;background:linear-gradient(90deg,${job.color},${job.color}cc)"></div></div>
+      </div>
+      <button class="btn btn-gold btn-block" style="font-size:17px;padding:16px" onclick="startMiniGame()">
+        <i class="fa-solid fa-play"></i> START WORK
+      </button>
+    </div>
+    <div class="section-title"><i class="fa-solid fa-layer-group"></i>All Jobs</div>
+    <div class="job-grid">`;
+
+  for (let key in JOBS) {
+    const j = JOBS[key];
+    const unlocked = GS.unlockedJobs.includes(key);
+    const selected = GS.currentJob === key;
+    const jl2 = GS.jobLevels[key] || 1;
+    const pm = 1 + (jl2 - 1) * 0.15;
+    html += `
+      <div class="card job-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}" 
+           onclick="${unlocked ? `selectJob('${key}')` : ''}" style="cursor:${unlocked ? 'pointer' : 'default'}">
+        <div class="job-lock"><i class="fa-solid fa-lock"></i></div>
+        <div class="job-icon" style="background:${j.colorBg};color:${j.color}"><i class="fa-solid ${j.icon}"></i></div>
+        <div class="job-name">${j.name}</div>
+        <div class="job-pay">₹${Math.floor(j.pay * pm)}/plate</div>
+        ${unlocked ? '' : `<div class="job-req"><i class="fa-solid fa-lock" style="font-size:9px"></i> Level ${j.unlock}</div>`}
+      </div>`;
+  }
+  html += '</div>';
+  document.getElementById('workScreen').innerHTML = html;
+}
+
+function selectJob(key) {
+  GS.currentJob = key;
+  saveGame();
+  renderWorkScreen();
+}
+
+// ============ DISH WASHING MINI-GAME ============
+
+const GRID = 60;
+let dishState = null;
+let dishAnimFrame = null;
+
+function startMiniGame() {
+  const overlay = document.getElementById('miniGameOverlay');
+  overlay.classList.add('active');
+  document.getElementById('mgReward').classList.remove('show');
+
+  const job = JOBS[GS.currentJob];
+  const jl = GS.jobLevels[GS.currentJob] || 1;
+  const payMult = 1 + (jl - 1) * 0.15;
+  document.getElementById('mgTitle').textContent = job.name;
+  document.getElementById('mgSubtitle').textContent = 'Scrub away the dirt!';
+  document.getElementById('mgBadge').textContent = '₹' + Math.floor(job.pay * payMult);
+
+  if (GS.currentJob === 'dishwasher') {
+    initDishWashing(payMult);
+  } else if (GS.currentJob === 'cleaner') {
+    initMopGame(payMult);
+  } else {
+    // For locked/simplified jobs, use dish washing with different skin
+    initDishWashing(payMult);
+  }
+}
+
+function stopMiniGame() {
+  if (dishAnimFrame) cancelAnimationFrame(dishAnimFrame);
+  dishAnimFrame = null;
+  dishState = null;
+  document.getElementById('miniGameOverlay').classList.remove('active');
+  document.getElementById('mgCanvasWrap').innerHTML = '';
+  document.getElementById('stainIndicators').innerHTML = '';
+  renderWorkScreen();
+}
+
+document.getElementById('mgBack').addEventListener('click', stopMiniGame);
+document.getElementById('rewardNext').addEventListener('click', () => {
+  document.getElementById('mgReward').classList.remove('show');
+  const payMult = 1 + ((GS.jobLevels[GS.currentJob] || 1) - 1) * 0.15;
+  if (GS.currentJob === 'cleaner') initMopGame(payMult);
+  else initDishWashing(payMult);
+});
+
+document.getElementById('rewardAd').addEventListener('click', () => {
+  showNotif('Ad not available in this demo', 'error');
+});
+
+function initDishWashing(payMult) {
+  const wrap = document.getElementById('mgCanvasWrap');
+  wrap.innerHTML = '';
+  document.getElementById('mgProgressWrap').style.display = 'flex';
+
+  const size = Math.min(window.innerWidth * 0.92, window.innerHeight * 0.52, 420);
+  const dpr = window.devicePixelRatio || 1;
+
+  // Three layered canvases
+  const plateCanvas = document.createElement('canvas');
+  const stainCanvas = document.createElement('canvas');
+  const effectCanvas = document.createElement('canvas');
+
+  [plateCanvas, stainCanvas, effectCanvas].forEach(c => {
+    c.width = size * dpr; c.height = size * dpr;
+    c.style.width = size + 'px'; c.style.height = size + 'px';
+    c.style.position = 'absolute';
+    c.style.left = '50%'; c.style.top = '50%';
+    c.style.transform = 'translate(-50%,-50%)';
+    wrap.appendChild(c);
+  });
+
+  const plateCtx = plateCanvas.getContext('2d');
+  const stainCtx = stainCanvas.getContext('2d');
+  const effectCtx = effectCanvas.getContext('2d');
+  plateCtx.scale(dpr, dpr);
+  stainCtx.scale(dpr, dpr);
+  effectCtx.scale(dpr, dpr);
+
+  const cx = size / 2, cy = size / 2;
+  const plateR = size * 0.42;
+  const rimW = size * 0.05;
+
+  // Draw plate (static)
+  function drawPlate() {
+    plateCtx.clearRect(0, 0, size, size);
+    // Shadow
+    plateCtx.save();
+    plateCtx.beginPath();
+    plateCtx.ellipse(cx, cy + 8, plateR + 4, plateR * 0.3 + 4, 0, 0, Math.PI * 2);
+    plateCtx.fillStyle = 'rgba(0,0,0,0.35)';
+    plateCtx.filter = 'blur(12px)';
+    plateCtx.fill();
+    plateCtx.restore();
+
+    // Rim
+    const rimGrad = plateCtx.createRadialGradient(cx - plateR * 0.2, cy - plateR * 0.2, plateR * 0.5, cx, cy, plateR + rimW);
+    rimGrad.addColorStop(0, '#E8E0D4');
+    rimGrad.addColorStop(0.8, '#D4CCC0');
+    rimGrad.addColorStop(0.95, '#B8B0A4');
+    rimGrad.addColorStop(1, '#9A9288');
+    plateCtx.beginPath();
+    plateCtx.arc(cx, cy, plateR + rimW, 0, Math.PI * 2);
+    plateCtx.fillStyle = rimGrad;
+    plateCtx.fill();
+
+    // Inner surface
+    const surfGrad = plateCtx.createRadialGradient(cx - plateR * 0.15, cy - plateR * 0.15, 0, cx, cy, plateR);
+    surfGrad.addColorStop(0, '#FAF6F0');
+    surfGrad.addColorStop(0.6, '#F0EBE3');
+    surfGrad.addColorStop(1, '#E0D8CE');
+    plateCtx.beginPath();
+    plateCtx.arc(cx, cy, plateR, 0, Math.PI * 2);
+    plateCtx.fillStyle = surfGrad;
+    plateCtx.fill();
+
+    // Subtle ring pattern
+    plateCtx.beginPath();
+    plateCtx.arc(cx, cy, plateR * 0.7, 0, Math.PI * 2);
+    plateCtx.strokeStyle = 'rgba(0,0,0,0.03)';
+    plateCtx.lineWidth = 1;
+    plateCtx.stroke();
+
+    // Shine highlight
+    plateCtx.save();
+    plateCtx.beginPath();
+    plateCtx.ellipse(cx - plateR * 0.25, cy - plateR * 0.3, plateR * 0.35, plateR * 0.15, -0.4, 0, Math.PI * 2);
+    const shineGrad = plateCtx.createRadialGradient(cx - plateR * 0.25, cy - plateR * 0.3, 0, cx - plateR * 0.25, cy - plateR * 0.3, plateR * 0.35);
+    shineGrad.addColorStop(0, 'rgba(255,255,255,0.25)');
+    shineGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    plateCtx.fillStyle = shineGrad;
+    plateCtx.fill();
+    plateCtx.restore();
+  }
+
+  drawPlate();
+
+  // Generate stains
+  const jl = GS.jobLevels[GS.currentJob] || 1;
+  const numStains = Math.min(3 + Math.floor(jl * 0.8), 8);
+  const maxDifficulty = Math.min(1 + jl * 0.3, 3);
+  const stains = [];
+
+  // Higher job levels can have harder stains
+  const availableTypes = STAIN_KEYS.filter((k, i) => i <= Math.floor(maxDifficulty));
+
+  for (let i = 0; i < numStains; i++) {
+    const type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+    const angle = Math.random() * Math.PI * 2;
+    const dist = Math.random() * plateR * 0.75;
+    const x = cx + Math.cos(angle) * dist;
+    const y = cy + Math.sin(angle) * dist;
+    const baseSize = 18 + Math.random() * 30 + STAIN_TYPES[type].difficulty * 8;
+    stains.push({ type, x, y, size: baseSize });
+  }
+
+  // Draw stains on stain canvas
+  function drawStain(s) {
+    const cfg = STAIN_TYPES[s.type];
+    const numBlobs = 3 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < numBlobs; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const d = Math.random() * s.size * 0.5;
+      const bx = s.x + Math.cos(a) * d;
+      const by = s.y + Math.sin(a) * d;
+      const bsize = s.size * (0.3 + Math.random() * 0.7);
+      const grad = stainCtx.createRadialGradient(bx, by, 0, bx, by, bsize);
+      grad.addColorStop(0, cfg.color);
+      grad.addColorStop(0.6, cfg.colorMid);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      stainCtx.globalAlpha = cfg.opacity;
+      stainCtx.fillStyle = grad;
+      stainCtx.beginPath();
+      stainCtx.arc(bx, by, bsize, 0, Math.PI * 2);
+      stainCtx.fill();
+    }
+    stainCtx.globalAlpha = 1;
+  }
+
+  stains.forEach(drawStain);
+
+  // Build dirty cell set
+  const dirtyCells = new Set();
+  const cellStainDiff = new Float32Array(GRID * GRID); // difficulty per cell
+  const cellW = size / GRID, cellH = size / GRID;
+
+  function sampleDirtyCells() {
+    const imgData = stainCtx.getImageData(0, 0, stainCanvas.width, stainCanvas.height);
+    const data = imgData.data;
+    const sw = stainCanvas.width;
+    for (let gy = 0; gy < GRID; gy++) {
+      for (let gx = 0; gx < GRID; gx++) {
+        const px = Math.floor((gx + 0.5) * cellW * dpr);
+        const py = Math.floor((gy + 0.5) * cellH * dpr);
+        const idx = (py * sw + px) * 4;
+        if (data[idx + 3] > 8) {
+          dirtyCells.add(gy * GRID + gx);
+          // Store difficulty (use max difficulty of overlapping stains)
+          let maxD = 0;
+          stains.forEach(s => {
+            const scx = (s.x / size) * GRID;
+            const scy = (s.y / size) * GRID;
+            const sr = (s.size / size) * GRID;
+            if (Math.hypot(gx - scx, gy - scy) < sr) {
+              maxD = Math.max(maxD, STAIN_TYPES[s.type].difficulty);
+            }
+          });
+          cellStainDiff[gy * GRID + gx] = maxD;
+        }
+      }
+    }
+  }
+  sampleDirtyCells();
+
+  const totalDirty = dirtyCells.size;
+
+  // Show stain type indicators
+  const stainTypesPresent = [...new Set(stains.map(s => s.type))];
+  document.getElementById('stainIndicators').innerHTML = stainTypesPresent.map(t => {
+    const cfg = STAIN_TYPES[t];
+    return `<span class="stain-tag" style="background:${cfg.tagBg};color:${cfg.tagColor}"><i class="fa-solid fa-droplet" style="font-size:8px"></i>${cfg.name}</span>`;
+  }).join('');
+
+  // State
+  const cleanedCells = new Set();
+  let isScrubbing = false;
+  let lastX = 0, lastY = 0;
+  let lastSoundTime = 0;
+  const particles = [];
+  let cleanPct = 0;
+  let completed = false;
+
+  // Auto-clean booster
+  if (GS.boosters.autoclean) {
+    GS.boosters.autoclean = false;
+    let autoCount = Math.floor(totalDirty * 0.5);
+    const dirtyArr = [...dirtyCells];
+    // Shuffle and pick half
+    for (let i = dirtyArr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [dirtyArr[i], dirtyArr[j]] = [dirtyArr[j], dirtyArr[i]];
+    }
+    for (let i = 0; i < Math.min(autoCount, dirtyArr.length); i++) {
+      const idx = dirtyArr[i];
+      cleanedCells.add(idx);
+      // Erase from stain canvas
+      const gx = idx % GRID, gy = Math.floor(idx / GRID);
+      const px = (gx + 0.5) * cellW, py = (gy + 0.5) * cellH;
+      stainCtx.save();
+      stainCtx.globalCompositeOperation = 'destination-out';
+      stainCtx.beginPath();
+      stainCtx.arc(px, py, cellW * 1.2, 0, Math.PI * 2);
+      stainCtx.fill();
+      stainCtx.restore();
+    }
+    showNotif('Auto-Clean activated! 50% done!', 'gold');
+  }
+
+  function updateCleanPct() {
+    let cleaned = 0;
+    cleanedCells.forEach(idx => { if (dirtyCells.has(idx)) cleaned++; });
+    cleanPct = Math.min(100, Math.floor(cleaned / totalDirty * 100));
+    document.getElementById('mgProgressFill').style.width = cleanPct + '%';
+    document.getElementById('mgPct').textContent = cleanPct + '%';
+    if (cleanPct >= 100 && !completed) {
+      completed = true;
+      onPlateComplete(payMult);
+    }
+  }
+
+  function scrub(x, y, speed) {
+    if (completed) return;
+    // Clean radius depends on speed and difficulty
+    const speedFactor = Math.max(0.35, 1 - speed / 40);
+    const baseR = cellW * 1.8;
+
+    // Check what's under the cursor for difficulty
+    const gx = Math.floor(x / cellW);
+    const gy = Math.floor(y / cellH);
+    const cellIdx = gy * GRID + gx;
+    const diff = (cellIdx >= 0 && cellIdx < GRID * GRID) ? cellStainDiff[cellIdx] : 1;
+    const diffFactor = 1 / Math.max(diff, 0.5);
+    const r = Math.max(cellW * 0.5, baseR * speedFactor * diffFactor);
+
+    // Erase from stain canvas
+    stainCtx.save();
+    stainCtx.globalCompositeOperation = 'destination-out';
+    const eraseGrad = stainCtx.createRadialGradient(x, y, 0, x, y, r);
+    eraseGrad.addColorStop(0, 'rgba(255,255,255,1)');
+    eraseGrad.addColorStop(0.7, 'rgba(255,255,255,0.6)');
+    eraseGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    stainCtx.fillStyle = eraseGrad;
+    stainCtx.beginPath();
+    stainCtx.arc(x, y, r, 0, Math.PI * 2);
+    stainCtx.fill();
+    stainCtx.restore();
+
+    // Mark grid cells
+    const minGX = Math.max(0, Math.floor((x - r) / cellW));
+    const maxGX = Math.min(GRID - 1, Math.floor((x + r) / cellW));
+    const minGY = Math.max(0, Math.floor((y - r) / cellH));
+    const maxGY = Math.min(GRID - 1, Math.floor((y + r) / cellH));
+    for (let gy2 = minGY; gy2 <= maxGY; gy2++) {
+      for (let gx2 = minGX; gx2 <= maxGX; gx2++) {
+        const ci = gy2 * GRID + gx2;
+        if (dirtyCells.has(ci) && !cleanedCells.has(ci)) {
+          const ccx = (gx2 + 0.5) * cellW;
+          const ccy = (gy2 + 0.5) * cellH;
+          if (Math.hypot(ccx - x, ccy - y) <= r) {
+            // Hard stains have a chance to resist
+            const cellDiff = cellStainDiff[ci];
+            if (cellDiff > 1.5 && Math.random() > (1 / cellDiff)) {
+              // Resisted - but still show some visual progress
+            } else {
+              cleanedCells.add(ci);
+            }
+          }
+        }
+      }
+    }
+
+    // Spawn particles
+    const pCount = Math.floor(1 + speed * 0.15);
+    for (let i = 0; i < pCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const spd = 1 + Math.random() * 2 + speed * 0.05;
+      const isBubble = Math.random() > 0.4;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * spd,
+        vy: Math.sin(angle) * spd - (isBubble ? 1.5 : 0),
+        life: 1,
+        decay: 0.02 + Math.random() * 0.02,
+        size: isBubble ? 2 + Math.random() * 3 : 1.5 + Math.random() * 2,
+        color: isBubble ? 'rgba(255,255,255,0.6)' : STAIN_TYPES[stains[0]?.type || 'regular'].color,
+        isBubble
+      });
+    }
+
+    // Sound
+    const now = performance.now();
+    if (now - lastSoundTime > 50) {
+      playScrubSound(Math.min(speed * 0.08, 1));
+      lastSoundTime = now;
+    }
+
+    updateCleanPct();
+  }
+
+  function getPos(e) {
+    const rect = effectCanvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  }
+
+  function onDown(e) {
+    e.preventDefault();
+    isScrubbing = true;
+    const p = getPos(e);
+    lastX = p.x; lastY = p.y;
+  }
+
+  function onMove(e) {
+    e.preventDefault();
+    if (!isScrubbing) return;
+    const p = getPos(e);
+    const speed = Math.hypot(p.x - lastX, p.y - lastY);
+    // Interpolate between last and current for smooth cleaning
+    const steps = Math.max(1, Math.floor(speed / 4));
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const ix = lastX + (p.x - lastX) * t;
+      const iy = lastY + (p.y - lastY) * t;
+      scrub(ix, iy, speed);
+    }
+    lastX = p.x; lastY = p.y;
+  }
+
+  function onUp(e) {
+    isScrubbing = false;
+  }
+
+  effectCanvas.addEventListener('mousedown', onDown);
+  effectCanvas.addEventListener('mousemove', onMove);
+  effectCanvas.addEventListener('mouseup', onUp);
+  effectCanvas.addEventListener('mouseleave', onUp);
+  effectCanvas.addEventListener('touchstart', onDown, { passive: false });
+  effectCanvas.addEventListener('touchmove', onMove, { passive: false });
+  effectCanvas.addEventListener('touchend', onUp);
+  effectCanvas.addEventListener('touchcancel', onUp);
+
+  // Effect animation loop
+  function animEffects() {
+    effectCtx.clearRect(0, 0, size, size);
+
+    // Update and draw particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.isBubble) p.vy -= 0.03; // Float up
+      else p.vy += 0.05; // Gravity for dirt
+      p.life -= p.decay;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+
+      effectCtx.globalAlpha = p.life;
+      effectCtx.fillStyle = p.color;
+      effectCtx.beginPath();
+      effectCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      effectCtx.fill();
+    }
+    effectCtx.globalAlpha = 1;
+
+    // Draw scrub cursor when active
+    if (isScrubbing && !completed) {
+      effectCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+      effectCtx.lineWidth = 2;
+      effectCtx.beginPath();
+      effectCtx.arc(lastX, lastY, cellW * 2, 0, Math.PI * 2);
+      effectCtx.stroke();
+
+      // Water droplet effect
+      effectCtx.fillStyle = 'rgba(150,200,255,0.15)';
+      effectCtx.beginPath();
+      effectCtx.arc(lastX, lastY, cellW * 2.5, 0, Math.PI * 2);
+      effectCtx.fill();
+    }
+
+    // Sparkle on clean areas (occasional)
+    if (cleanPct > 30 && Math.random() < 0.03) {
+      const cleanArr = [...cleanedCells];
+      if (cleanArr.length > 0) {
+        const rc = cleanArr[Math.floor(Math.random() * cleanArr.length)];
+        const sx = (rc % GRID + 0.5) * cellW;
+        const sy = (Math.floor(rc / GRID) + 0.5) * cellH;
+        effectCtx.fillStyle = 'rgba(255,255,255,0.8)';
+        effectCtx.beginPath();
+        // Small star shape
+        const ss = 2 + Math.random() * 2;
+        effectCtx.moveTo(sx, sy - ss);
+        effectCtx.lineTo(sx + ss * 0.3, sy - ss * 0.3);
+        effectCtx.lineTo(sx + ss, sy);
+        effectCtx.lineTo(sx + ss * 0.3, sy + ss * 0.3);
+        effectCtx.lineTo(sx, sy + ss);
+        effectCtx.lineTo(sx - ss * 0.3, sy + ss * 0.3);
+        effectCtx.lineTo(sx - ss, sy);
+        effectCtx.lineTo(sx - ss * 0.3, sy - ss * 0.3);
+        effectCtx.closePath();
+        effectCtx.fill();
+      }
+    }
+
+    dishAnimFrame = requestAnimationFrame(animEffects);
+  }
+  animEffects();
+
+  dishState = { stop: () => { cancelAnimationFrame(dishAnimFrame); } };
+  updateCleanPct();
+}
+
+function onPlateComplete(payMult) {
+  const job = JOBS[GS.currentJob];
+  const jl = GS.jobLevels[GS.currentJob] || 1;
+  const pay = Math.floor(job.pay * payMult);
+  const xp = Math.floor(job.xp * payMult);
+
+  GS.totalPlates++;
+
+  // Job XP
+  GS.jobXP[GS.currentJob] = (GS.jobXP[GS.currentJob] || 0) + xp;
+  const jxpNext = 50 * jl;
+  if (GS.jobXP[GS.currentJob] >= jxpNext) {
+    GS.jobXP[GS.currentJob] -= jxpNext;
+    GS.jobLevels[GS.currentJob] = (GS.jobLevels[GS.currentJob] || 1) + 1;
+    showNotif(`${job.name} leveled up to ${GS.jobLevels[GS.currentJob]}!`, 'gold');
+  }
+
+  // Quest progress
+  if (!GS.questProgress.clean5) GS.questProgress.clean5 = 0;
+  GS.questProgress.clean5++;
+  if (!GS.questProgress.clean20) GS.questProgress.clean20 = 0;
+  GS.questProgress.clean20++;
+
+  playSuccessSound();
+  spawnConfetti(40);
+
+  // Show reward
+  setTimeout(() => {
+    document.getElementById('rewardAmount').textContent = '+₹' + pay;
+    document.getElementById('rewardXP').textContent = '+' + xp + ' XP';
+    document.getElementById('mgReward').classList.add('show');
+    addMoney(pay);
+    addXP(xp);
+  }, 400);
+}
+
+// ============ MOP GAME (Restaurant Cleaner) ============
+
+function initMopGame(payMult) {
+  const wrap = document.getElementById('mgCanvasWrap');
+  wrap.innerHTML = '';
+  document.getElementById('mgProgressWrap').style.display = 'flex';
+  document.getElementById('stainIndicators').innerHTML = '';
+
+  const w = Math.min(window.innerWidth * 0.92, 420);
+  const h = Math.min(window.innerHeight * 0.52, 320);
+  const dpr = window.devicePixelRatio || 1;
+
+  const bgCanvas = document.createElement('canvas');
+  const dirtCanvas = document.createElement('canvas');
+  const fxCanvas = document.createElement('canvas');
+
+  [bgCanvas, dirtCanvas, fxCanvas].forEach(c => {
+    c.width = w * dpr; c.height = h * dpr;
+    c.style.width = w + 'px'; c.style.height = h + 'px';
+    c.style.position = 'absolute';
+    c.style.left = '50%'; c.style.top = '50%';
+    c.style.transform = 'translate(-50%,-50%)';
+    wrap.appendChild(c);
+  });
+
+  const bgCtx = bgCanvas.getContext('2d');
+  const dirtCtx = dirtCanvas.getContext('2d');
+  const fxCtx = fxCanvas.getContext('2d');
+  bgCtx.scale(dpr, dpr); dirtCtx.scale(dpr, dpr); fxCtx.scale(dpr, dpr);
+
+  // Draw tiled floor
+  const tileSize = 40;
+  for (let ty = 0; ty < h / tileSize; ty++) {
+    for (let tx = 0; tx < w / tileSize; tx++) {
+      bgCtx.fillStyle = (tx + ty) % 2 === 0 ? '#3a3530' : '#332e28';
+      bgCtx.fillRect(tx * tileSize, ty * tileSize, tileSize, tileSize);
+      bgCtx.strokeStyle = 'rgba(0,0,0,0.15)';
+      bgCtx.strokeRect(tx * tileSize, ty * tileSize, tileSize, tileSize);
+    }
+  }
+
+  // Generate dirt spots
+  const dirtSpots = [];
+  const numSpots = 12 + Math.floor(Math.random() * 8);
+  for (let i = 0; i < numSpots; i++) {
+    const x = 20 + Math.random() * (w - 40);
+    const y = 20 + Math.random() * (h - 40);
+    const size = 12 + Math.random() * 25;
+    dirtSpots.push({ x, y, size });
+    const grad = dirtCtx.createRadialGradient(x, y, 0, x, y, size);
+    grad.addColorStop(0, 'rgba(60,40,20,0.7)');
+    grad.addColorStop(0.6, 'rgba(50,35,15,0.4)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    dirtCtx.fillStyle = grad;
+    dirtCtx.beginPath();
+    dirtCtx.arc(x, y, size, 0, Math.PI * 2);
+    dirtCtx.fill();
+  }
+
+  // Footprints
+  for (let i = 0; i < 6; i++) {
+    const fx = 30 + Math.random() * (w - 60);
+    const fy = 30 + Math.random() * (h - 60);
+    dirtCtx.fillStyle = 'rgba(40,25,10,0.5)';
+    dirtCtx.beginPath();
+    dirtCtx.ellipse(fx, fy, 5, 9, Math.random() * Math.PI, 0, Math.PI * 2);
+    dirtCtx.fill();
+    dirtCtx.beginPath();
+    dirtCtx.ellipse(fx + 6, fy - 12, 5, 9, Math.random() * Math.PI, 0, Math.PI * 2);
+    dirtCtx.fill();
+  }
+
+  // Grid tracking
+  const gSize = 50;
+  const gw = w / gSize, gh = h / gSize;
+  const dirtySet = new Set();
+  const cleanSet = new Set();
+
+  // Sample dirt
+  const imgData = dirtCtx.getImageData(0, 0, dirtCanvas.width, dirtCanvas.height);
+  const data = imgData.data;
+  const sw = dirtCanvas.width;
+  for (let gy = 0; gy < gh; gy++) {
+    for (let gx = 0; gx < gw; gx++) {
+      const px = Math.floor((gx + 0.5) * gSize * dpr);
+      const py = Math.floor((gy + 0.5) * gSize * dpr);
+      const idx = (py * sw + px) * 4;
+      if (data[idx + 3] > 8) dirtySet.add(gy * Math.ceil(gw) + gx);
+    }
+  }
+  const totalDirty = dirtySet.size;
+  let completed = false;
+  let isScrubbing = false, lastX = 0, lastY = 0;
+  const particles = [];
+
+  function updatePct() {
+    let c = 0;
+    cleanSet.forEach(i => { if (dirtySet.has(i)) c++; });
+    const pct = Math.min(100, Math.floor(c / totalDirty * 100));
+    document.getElementById('mgProgressFill').style.width = pct + '%';
+    document.getElementById('mgPct').textContent = pct + '%';
+    if (pct >= 100 && !completed) {
+      completed = true;
+      onPlateComplete(payMult);
+    }
+  }
+
+  function scrub(x, y) {
+    if (completed) return;
+    const r = gSize * 1.6;
+    dirtCtx.save();
+    dirtCtx.globalCompositeOperation = 'destination-out';
+    const g = dirtCtx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.8, 'rgba(255,255,255,0.5)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    dirtCtx.fillStyle = g;
+    dirtCtx.beginPath();
+    dirtCtx.arc(x, y, r, 0, Math.PI * 2);
+    dirtCtx.fill();
+    dirtCtx.restore();
+
+    // Wet trail
+    fxCtx.fillStyle = 'rgba(100,140,180,0.08)';
+    fxCtx.beginPath();
+    fxCtx.arc(x, y, r * 0.8, 0, Math.PI * 2);
+    fxCtx.fill();
+
+    // Grid
+    const mgx = Math.ceil(gw);
+    const minGX = Math.max(0, Math.floor((x - r) / gSize));
+    const maxGX = Math.min(mgx - 1, Math.floor((x + r) / gSize));
+    const minGY = Math.max(0, Math.floor((y - r) / gSize));
+    const maxGY = Math.min(gh - 1, Math.floor((y + r) / gSize));
+    for (let gy = minGY; gy <= maxGY; gy++) {
+      for (let gx = minGX; gx <= maxGX; gx++) {
+        const ci = gy * mgx + gx;
+        if (dirtySet.has(ci)) cleanSet.add(ci);
+      }
+    }
+
+    // Particles
+    for (let i = 0; i < 2; i++) {
+      const a = Math.random() * Math.PI * 2;
+      particles.push({
+        x, y, vx: Math.cos(a) * (1 + Math.random()), vy: Math.sin(a) * (1 + Math.random()) - 1,
+        life: 1, decay: 0.025, size: 1.5 + Math.random() * 2,
+        color: 'rgba(120,100,70,0.6)', isBubble: false
+      });
+    }
+
+    updatePct();
+  }
+
+  function getPos(e) {
+    const rect = fxCanvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+
+  fxCanvas.addEventListener('mousedown', e => { e.preventDefault(); isScrubbing = true; const p = getPos(e); lastX = p.x; lastY = p.y; });
+  fxCanvas.addEventListener('mousemove', e => {
+    e.preventDefault(); if (!isScrubbing) return;
+    const p = getPos(e);
+    const d = Math.hypot(p.x - lastX, p.y - lastY);
+    const steps = Math.max(1, Math.floor(d / 5));
+    for (let i = 0; i <= steps; i++) { const t = i / steps; scrub(lastX + (p.x - lastX) * t, lastY + (p.y - lastY) * t); }
+    lastX = p.x; lastY = p.y;
+  });
+  fxCanvas.addEventListener('mouseup', () => isScrubbing = false);
+  fxCanvas.addEventListener('mouseleave', () => isScrubbing = false);
+  fxCanvas.addEventListener('touchstart', e => { e.preventDefault(); isScrubbing = true; const p = getPos(e); lastX = p.x; lastY = p.y; }, { passive: false });
+  fxCanvas.addEventListener('touchmove', e => {
+    e.preventDefault(); if (!isScrubbing) return;
+    const p = getPos(e);
+    const d = Math.hypot(p.x - lastX, p.y - lastY);
+    const steps = Math.max(1, Math.floor(d / 5));
+    for (let i = 0; i <= steps; i++) { const t = i / steps; scrub(lastX + (p.x - lastX) * t, lastY + (p.y - lastY) * t); }
+    lastX = p.x; lastY = p.y;
+  }, { passive: false });
+  fxCanvas.addEventListener('touchend', () => isScrubbing = false);
+  fxCanvas.addEventListener('touchcancel', () => isScrubbing = false);
+
+  function animFx() {
+    // Don't clear fully - let wet trail persist briefly
+    fxCtx.globalCompositeOperation = 'destination-out';
+    fxCtx.fillStyle = 'rgba(0,0,0,0.01)';
+    fxCtx.fillRect(0, 0, w, h);
+    fxCtx.globalCompositeOperation = 'source-over';
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.04; p.life -= p.decay;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      fxCtx.globalAlpha = p.life;
+      fxCtx.fillStyle = p.color;
+      fxCtx.beginPath();
+      fxCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      fxCtx.fill();
+    }
+    fxCtx.globalAlpha = 1;
+    dishAnimFrame = requestAnimationFrame(animFx);
+  }
+  animFx();
+  dishState = { stop: () => cancelAnimationFrame(dishAnimFrame) };
+  updatePct();
+}
+
+// ============ LOTTERY SCREEN ============
+
+let activeLotteryTab = 'scratch';
+let scratchState = null;
+let wheelSpinning = false;
+
+function renderLotteryScreen() {
+  const locked = GS.level < 5;
+  let html = `<div class="section-title"><i class="fa-solid fa-ticket"></i>Lottery Shop</div>`;
+
+  if (locked) {
+    html += `<div class="card card-elevated" style="text-align:center;padding:40px 20px">
+      <i class="fa-solid fa-lock" style="font-size:36px;color:var(--muted2);margin-bottom:12px"></i>
+      <div style="font-size:18px;font-weight:800;margin-bottom:6px">Locked</div>
+      <div style="color:var(--muted);font-size:13px">Reach Level 5 to unlock the Lottery</div>
+      <div class="badge" style="margin-top:12px">Requires Level 5</div>
+    </div>`;
+    document.getElementById('lotteryScreen').innerHTML = html;
+    return;
+  }
+
+  html += `
+    <div class="lottery-tabs">
+      <button class="lottery-tab ${activeLotteryTab==='scratch'?'active':''}" onclick="switchLotteryTab('scratch')"><i class="fa-solid fa-hand-pointer"></i> Scratch</button>
+      <button class="lottery-tab ${activeLotteryTab==='wheel'?'active':''}" onclick="switchLotteryTab('wheel')"><i class="fa-solid fa-dharmachakra"></i> Wheel</button>
+      <button class="lottery-tab ${activeLotteryTab==='tickets'?'active':''}" onclick="switchLotteryTab('tickets')"><i class="fa-solid fa-ticket"></i> Tickets</button>
+    </div>
+    <div id="lotteryContent"></div>`;
+
+  document.getElementById('lotteryScreen').innerHTML = html;
+  renderLotteryContent();
+}
+
+function switchLotteryTab(tab) {
+  activeLotteryTab = tab;
+  scratchState = null;
+  renderLotteryScreen();
+}
+
+function renderLotteryContent() {
+  const el = document.getElementById('lotteryContent');
+  if (!el) return;
+  if (activeLotteryTab === 'scratch') renderScratchCard(el);
+  else if (activeLotteryTab === 'wheel') renderWheel(el);
+  else if (activeLotteryTab === 'tickets') renderTickets(el);
+}
+
+// -- Scratch Card --
+function renderScratchCard(container) {
+  container.innerHTML = `
+    <div class="card card-elevated" style="text-align:center;padding:20px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">Scratch Card</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Scratch to reveal your prize!</div>
+      <div class="scratch-container" id="scratchContainer">
+        <div class="scratch-prize">
+          <div class="scratch-prize-amount" id="scratchPrize">₹???</div>
+          <div class="scratch-prize-label">Your Prize</div>
+        </div>
+        <canvas id="scratchCanvas"></canvas>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;justify-content:center">
+        <button class="btn btn-gold btn-sm" onclick="newScratchCard()"><i class="fa-solid fa-rotate"></i> New Card (₹10)</button>
+      </div>
+      <div class="ad-placeholder" style="margin-top:10px"><i class="fa-solid fa-play-circle"></i> Watch Ad for Free Scratch Card</div>
+    </div>`;
+  initScratchCard();
+}
+
+function initScratchCard() {
+  const canvas = document.getElementById('scratchCanvas');
+  if (!canvas) return;
+  const container = document.getElementById('scratchContainer');
+  const w = container.offsetWidth, h = container.offsetHeight;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // Determine prize
+  const luckBoost = GS.boosters.lucky > Date.now() ? 1.15 : 1;
+  const roll = Math.random();
+  let prize;
+  if (roll < 0.02 * luckBoost) prize = 500;
+  else if (roll < 0.08 * luckBoost) prize = 100;
+  else if (roll < 0.2 * luckBoost) prize = 50;
+  else if (roll < 0.45 * luckBoost) prize = 20;
+  else if (roll < 0.75 * luckBoost) prize = 10;
+  else prize = 5;
+
+  document.getElementById('scratchPrize').textContent = '₹' + prize;
+
+  // Draw metallic scratch layer
+  const grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, '#C0C0C0');
+  grad.addColorStop(0.3, '#A8A8A8');
+  grad.addColorStop(0.5, '#D0D0D0');
+  grad.addColorStop(0.7, '#A0A0A0');
+  grad.addColorStop(1, '#B8B8B8');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  // Add noise texture
+  for (let i = 0; i < 3000; i++) {
+    const nx = Math.random() * w, ny = Math.random() * h;
+    ctx.fillStyle = `rgba(${Math.random()>0.5?255:0},${Math.random()>0.5?255:0},${Math.random()>0.5?255:0},${Math.random()*0.05})`;
+    ctx.fillRect(nx, ny, 1, 1);
+  }
+
+  // Text
+  ctx.fillStyle = 'rgba(100,100,100,0.5)';
+  ctx.font = '700 16px Outfit';
+  ctx.textAlign = 'center';
+  ctx.fillText('SCRATCH HERE', w / 2, h / 2 + 6);
+
+  // Scratch interaction
+  let isScratching = false;
+  let scratchedPixels = 0;
+  let totalPixels = w * h * 0.8;
+  let revealed = false;
+
+  function scratch(x, y) {
+    if (revealed) return;
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    const r = 22;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.8, 'rgba(255,255,255,0.8)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    scratchedPixels += r * r * 2;
+
+    if (scratchedPixels / totalPixels > 0.45 && !revealed) {
+      revealed = true;
+      // Clear remaining
+      ctx.clearRect(0, 0, w, h);
+      GS.money += prize;
+      GS.totalEarned += prize;
+      GS.totalLottery++;
+      GS.questProgress.lottery3 = (GS.questProgress.lottery3 || 0) + 1;
+      updateHUD();
+      saveGame();
+      showFloatText(canvas.getBoundingClientRect().left + w / 2, canvas.getBoundingClientRect().top, '+₹' + prize, 'var(--gold)');
+      playSuccessSound();
+      spawnConfetti(15);
+      showNotif(`You won ₹${prize} from the scratch card!`, 'gold');
+    }
+  }
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+
+  canvas.addEventListener('mousedown', e => { e.preventDefault(); isScratching = true; const p = getPos(e); scratch(p.x, p.y); });
+  canvas.addEventListener('mousemove', e => { e.preventDefault(); if (!isScratching) return; const p = getPos(e); scratch(p.x, p.y); });
+  canvas.addEventListener('mouseup', () => isScratching = false);
+  canvas.addEventListener('mouseleave', () => isScratching = false);
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); isScratching = true; const p = getPos(e); scratch(p.x, p.y); }, { passive: false });
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!isScratching) return; const p = getPos(e); scratch(p.x, p.y); }, { passive: false });
+  canvas.addEventListener('touchend', () => isScratching = false);
+
+  scratchState = { prize, revealed: () => revealed };
+}
+
+function newScratchCard() {
+  if (GS.money < 10) { showNotif('Not enough money! Need ₹10', 'error'); return; }
+  GS.money -= 10;
+  GS.totalSpent += 10;
+  updateHUD();
+  saveGame();
+  initScratchCard();
+  showNotif('New scratch card purchased!', 'success');
+}
+
+// -- Lucky Wheel --
+function renderWheel(container) {
+  container.innerHTML = `
+    <div class="card card-elevated" style="text-align:center;padding:20px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">Lucky Wheel</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Spin for a chance to win big!</div>
+      <div class="wheel-container" id="wheelContainer">
+        <div class="wheel-pointer"></div>
+        <canvas id="wheelCanvas" width="280" height="280"></canvas>
+        <div class="wheel-center"><i class="fa-solid fa-play" style="font-size:14px"></i></div>
+      </div>
+      <div style="margin-top:14px">
+        <button class="btn btn-gold btn-sm" id="spinBtn" onclick="spinWheel()"><i class="fa-solid fa-rotate"></i> Spin (₹25)</button>
+      </div>
+      <div id="wheelResult" style="margin-top:12px;font-size:18px;font-weight:900;min-height:28px"></div>
+    </div>`;
+  drawWheel(0);
+}
+
+function drawWheel(rotation) {
+  const canvas = document.getElementById('wheelCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 140, cy = 140, r = 130;
+  const segCount = WHEEL_SEGMENTS.length;
+  const segAngle = (Math.PI * 2) / segCount;
+
+  ctx.clearRect(0, 0, 280, 280);
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rotation);
+
+  for (let i = 0; i < segCount; i++) {
+    const startAngle = i * segAngle - Math.PI / 2;
+    const endAngle = startAngle + segAngle;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, r, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = WHEEL_SEGMENTS[i].color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Text
+    ctx.save();
+    ctx.rotate(startAngle + segAngle / 2);
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 13px Outfit';
+    ctx.textAlign = 'center';
+    ctx.fillText(WHEEL_SEGMENTS[i].label, r * 0.65, 5);
+    ctx.restore();
+  }
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(0, 0, r + 3, 0, Math.PI * 2);
+  ctx.strokeStyle = '#E8A838';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Dots on ring
+  for (let i = 0; i < segCount; i++) {
+    const a = i * segAngle - Math.PI / 2;
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * (r + 3), Math.sin(a) * (r + 3), 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFD700';
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function spinWheel() {
+  if (wheelSpinning) return;
+  if (GS.money < 25) { showNotif('Not enough money! Need ₹25', 'error'); return; }
+  GS.money -= 25;
+  GS.totalSpent += 25;
+  updateHUD();
+  saveGame();
+  wheelSpinning = true;
+  document.getElementById('wheelResult').textContent = '';
+  playSpinSound();
+
+  const segCount = WHEEL_SEGMENTS.length;
+  const segAngle = (Math.PI * 2) / segCount;
+
+  // Determine result
+  const luckBoost = GS.boosters.lucky > Date.now() ? 1.15 : 1;
+  const weights = WHEEL_SEGMENTS.map(s => {
+    const v = s.value;
+    if (v >= 500) return 1 * luckBoost;
+    if (v >= 100) return 3 * luckBoost;
+    if (v >= 50) return 6;
+    if (v >= 20) return 12;
+    return 20;
+  });
+  const totalW = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * totalW;
+  let winIdx = 0;
+  for (let i = 0; i < weights.length; i++) {
+    r -= weights[i];
+    if (r <= 0) { winIdx = i; break; }
+  }
+
+  // Calculate target rotation
+  const targetSeg = winIdx;
+  const targetAngle = -(targetSeg * segAngle + segAngle / 2) - Math.PI / 2;
+  const spins = 5 + Math.random() * 3;
+  const totalRotation = spins * Math.PI * 2 + targetAngle;
+
+  const startRotation = 0;
+  const duration = 4000;
+  const startTime = performance.now();
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const currentRotation = startRotation + totalRotation * eased;
+    drawWheel(currentRotation);
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      wheelSpinning = false;
+      const prize = WHEEL_SEGMENTS[winIdx].value;
+      GS.money += prize;
+      GS.totalEarned += prize;
+      GS.totalLottery++;
+      GS.questProgress.lottery3 = (GS.questProgress.lottery3 || 0) + 1;
+      updateHUD();
+      saveGame();
+      document.getElementById('wheelResult').innerHTML = `<span style="color:var(--gold)">You won ₹${prize}!</span>`;
+      playSuccessSound();
+      spawnConfetti(20);
+      showNotif(`Wheel win: ₹${prize}!`, 'gold');
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+// -- Tickets --
+function renderTickets(container) {
+  let html = '';
+  LOTTERY_TICKETS.forEach((t, i) => {
+    html += `
+      <div class="card ticket-card">
+        <div class="ticket-icon" style="background:${t.color}22;color:${t.color}"><i class="fa-solid ${t.icon}"></i></div>
+        <div class="ticket-info">
+          <div class="ticket-name">${t.name}</div>
+          <div class="ticket-odds">Win chance: ${(t.odds * 100).toFixed(0)}%</div>
+        </div>
+        <div style="text-align:right">
+          <div class="ticket-jackpot">₹${formatNum(t.jackpot)}</div>
+          <button class="btn btn-gold btn-sm" style="margin-top:6px;padding:6px 12px;font-size:11px" onclick="buyTicket(${i})">₹${t.cost}</button>
+        </div>
+      </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function buyTicket(idx) {
+  const t = LOTTERY_TICKETS[idx];
+  if (GS.money < t.cost) { showNotif('Not enough money!', 'error'); return; }
+  GS.money -= t.cost;
+  GS.totalSpent += t.cost;
+  GS.totalLottery++;
+  GS.questProgress.lottery3 = (GS.questProgress.lottery3 || 0) + 1;
+
+  const luckBoost = GS.boosters.lucky > Date.now() ? 1.15 : 1;
+  if (Math.random() < t.odds * luckBoost) {
+    GS.money += t.jackpot;
+    GS.totalEarned += t.jackpot;
+    updateHUD();
+    saveGame();
+    spawnConfetti(50);
+    playSuccessSound();
+    showNotif(`JACKPOT! You won ₹${formatNum(t.jackpot)} from ${t.name}!`, 'gold');
+  } else {
+    // Consolation prize
+    const consolation = Math.floor(t.cost * 0.3);
+    GS.money += consolation;
+    GS.totalEarned += consolation;
+    updateHUD();
+    saveGame();
+    showNotif(`No luck this time. Consolation: ₹${consolation}`, 'success');
+  }
+}
+
+// ============ QUESTS SCREEN ============
+
+function renderQuestsScreen() {
+  let html = `<div class="section-title"><i class="fa-solid fa-list-check"></i>Quests</div>`;
+
+  QUESTS.forEach(q => {
+    let progress = 0;
+    if (q.type === 'plates') progress = GS.totalPlates;
+    else if (q.type === 'money') progress = GS.totalEarned;
+    else if (q.type === 'level') progress = GS.level;
+    else if (q.type === 'lottery') progress = GS.totalLottery;
+    else if (q.type === 'streak') progress = GS.streak;
+
+    const claimed = GS.questsClaimed.includes(q.id);
+    const complete = progress >= q.target;
+    const pct = Math.min(100, (progress / q.target) * 100);
+
+    html += `
+      <div class="card quest-item" style="opacity:${claimed ? '0.5' : '1'}">
+        <div class="quest-icon" style="${claimed ? 'color:var(--green)' : ''}"><i class="fa-solid ${claimed ? 'fa-check' : q.icon}"></i></div>
+        <div class="quest-info">
+          <div class="quest-name">${q.name}</div>
+          <div class="quest-progress">
+            <div class="progress-outer" style="margin-top:4px"><div class="progress-inner" style="width:${pct}%;background:${complete ? 'var(--green)' : 'var(--gold)'}"></div></div>
+            <span style="font-size:10px;color:var(--muted)">${Math.min(progress, q.target)}/${q.target}</span>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:12px;font-weight:800;color:var(--green)">₹${q.reward}</div>
+          ${claimed ? '<div style="font-size:10px;color:var(--green)">Claimed</div>' :
+            complete ? `<button class="btn btn-green btn-sm" style="padding:5px 12px;font-size:11px;margin-top:4px" onclick="claimQuest('${q.id}',${q.reward})">Claim</button>` :
+            '<div style="font-size:10px;color:var(--muted);margin-top:4px">In Progress</div>'}
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('questsScreen').innerHTML = html;
+}
+
+function claimQuest(id, reward) {
+  if (GS.questsClaimed.includes(id)) return;
+  GS.questsClaimed.push(id);
+  addMoney(reward);
+  showNotif(`Quest reward claimed: ₹${reward}!`, 'success');
+  renderQuestsScreen();
+  saveGame();
+}
+
+// ============ SHOP SCREEN ============
+
+function renderShopScreen() {
+  let html = `<div class="section-title"><i class="fa-solid fa-bag-shopping"></i>Shop</div>`;
+
+  SHOP_ITEMS.forEach((item, i) => {
+    const isActive = item.id === 'x2earn' && GS.boosters.x2earn > Date.now();
+    const isLucky = item.id === 'lucky' && GS.boosters.lucky > Date.now();
+    const activeLabel = isActive ? '<span class="badge badge-green" style="margin-left:6px">Active</span>' :
+                        isLucky ? '<span class="badge badge-green" style="margin-left:6px">Active</span>' : '';
+
+    html += `
+      <div class="card shop-item">
+        <div class="shop-icon" style="background:${item.colorBg};color:${item.color}"><i class="fa-solid ${item.icon}"></i></div>
+        <div class="shop-info">
+          <div class="shop-name">${item.name}${activeLabel}</div>
+          <div class="shop-desc">${item.desc}</div>
+        </div>
+        <button class="btn ${item.currency === 'gems' ? 'btn-outline' : 'btn-gold'} btn-sm" 
+                style="padding:6px 14px;font-size:12px;white-space:nowrap"
+                onclick="buyShopItem(${i})">
+          <i class="fa-solid ${item.currency === 'gems' ? 'fa-gem' : 'fa-indian-rupee-sign'}" style="font-size:10px"></i>${item.cost}
+        </button>
+      </div>`;
+  });
+
+  // Ad placeholders
+  html += `
+    <div style="margin-top:20px">
+      <div class="section-title"><i class="fa-solid fa-gift"></i>Free Rewards</div>
+      <div class="ad-placeholder" onclick="showNotif('Ad not available in demo','error')">
+        <i class="fa-solid fa-play-circle"></i> Watch Ad for ₹50
+      </div>
+      <div class="ad-placeholder" style="margin-top:8px" onclick="showNotif('Ad not available in demo','error')">
+        <i class="fa-solid fa-play-circle"></i> Watch Ad for 3 Gems
+      </div>
+    </div>`;
+
+  document.getElementById('shopScreen').innerHTML = html;
+}
+
+function buyShopItem(idx) {
+  const item = SHOP_ITEMS[idx];
+  if (item.currency === 'gems' && GS.gems < item.cost) { showNotif('Not enough gems!', 'error'); return; }
+  if (item.currency === 'money' && GS.money < item.cost) { showNotif('Not enough money!', 'error'); return; }
+
+  if (item.currency === 'gems') GS.gems -= item.cost;
+  else GS.money -= item.cost;
+
+  if (item.id === 'x2earn') { GS.boosters.x2earn = Date.now() + 5 * 60 * 1000; showNotif('2x Earnings active for 5 minutes!', 'gold'); }
+  else if (item.id === 'autoclean') { GS.boosters.autoclean = true; showNotif('Auto-Clean ready for next plate!', 'gold'); }
+  else if (item.id === 'gem10') { GS.gems += 10; showNotif('Purchased 10 gems!', 'success'); }
+  else if (item.id === 'gem50') { GS.gems += 50; showNotif('Purchased 50 gems!', 'success'); }
+  else if (item.id === 'lucky') { GS.boosters.lucky = Date.now() + 10 * 60 * 1000; showNotif('Lucky Boost active for 10 minutes!', 'gold'); }
+
+  updateHUD();
+  saveGame();
+  renderShopScreen();
+}
+
+// ============ PROFILE SCREEN ============
+
+function renderProfileScreen() {
+  const jl = GS.jobLevels[GS.currentJob] || 1;
+  let html = `
+    <div class="card card-elevated" style="text-align:center;padding:24px;margin-bottom:16px">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--gold-d),var(--gold-b));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#1a1000;margin:0 auto 10px">${GS.level}</div>
+      <div style="font-size:20px;font-weight:900">Player Level ${GS.level}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">${GS.xp} / ${GS.xpToNext} XP to next level</div>
+      ${GS.prestige > 0 ? `<div class="badge" style="margin-top:8px"><i class="fa-solid fa-crown"></i> Prestige ${GS.prestige}</div>` : ''}
+    </div>
+
+    <div class="section-title"><i class="fa-solid fa-chart-bar"></i>Statistics</div>
+    <div class="stat-grid">
+      <div class="card stat-card"><div class="val" style="color:var(--green)">₹${formatNum(GS.totalEarned)}</div><div class="label">Total Earned</div></div>
+      <div class="card stat-card"><div class="val">${GS.totalPlates}</div><div class="label">Plates Cleaned</div></div>
+      <div class="card stat-card"><div class="val">${GS.totalLottery}</div><div class="label">Lottery Plays</div></div>
+      <div class="card stat-card"><div class="val" style="color:var(--red)">₹${formatNum(GS.totalSpent)}</div><div class="label">Total Spent</div></div>
+      <div class="card stat-card"><div class="val">${GS.streak}</div><div class="label">Day Streak</div></div>
+      <div class="card stat-card"><div class="val">${GS.unlockedJobs.length}/${Object.keys(JOBS).length}</div><div class="label">Jobs Unlocked</div></div>
+      <div class="card stat-card"><div class="val">${jl}</div><div class="label">Current Job Lv</div></div>
+      <div class="card stat-card"><div class="val">${GS.gems}</div><div class="label">Gems</div></div>
+    </div>
+
+    <div class="section-title"><i class="fa-solid fa-gear"></i>Settings</div>
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:14px;font-weight:700">Sound Effects</div>
+        <div style="font-size:11px;color:var(--muted)">Toggle scrub and reward sounds</div>
+      </div>
+      <label style="position:relative;width:48px;height:28px;cursor:pointer">
+        <input type="checkbox" ${GS.settings.sound ? 'checked' : ''} onchange="toggleSound(this.checked)" style="opacity:0;width:0;height:0">
+        <span style="position:absolute;inset:0;background:${GS.settings.sound ? 'var(--green)' : 'var(--muted2)'};border-radius:28px;transition:.3s"></span>
+        <span style="position:absolute;top:3px;left:${GS.settings.sound ? '25px' : '3px'};width:22px;height:22px;background:#fff;border-radius:50%;transition:.3s"></span>
+      </label>
+    </div>
+
+    <div style="margin-top:16px">
+      <button class="btn btn-outline btn-block btn-sm" onclick="resetGame()" style="color:var(--red);border-color:rgba(239,68,68,.3)">
+        <i class="fa-solid fa-trash"></i> Reset All Progress
+      </button>
+    </div>`;
+
+  document.getElementById('profileScreen').innerHTML = html;
+}
+
+function toggleSound(on) {
+  GS.settings.sound = on;
+  saveGame();
+  renderProfileScreen();
+}
+
+function resetGame() {
+  if (!confirm('Are you sure? All progress will be lost!')) return;
+  localStorage.removeItem('fortuneHustle');
+  location.reload();
+}
+
+// ============ DAILY REWARDS ============
+
+function checkDailyLogin() {
+  const today = new Date().toDateString();
+  const lastLogin = GS.lastLogin ? new Date(GS.lastLogin).toDateString() : null;
+
+  if (lastLogin === today) {
+    // Already logged in today
+    if (!GS.dailyClaimed) showDailyModal();
+    return;
+  }
+
+  // Check streak
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (lastLogin === yesterday.toDateString()) {
+    GS.streak++;
+  } else if (lastLogin !== today) {
+    GS.streak = 1;
+  }
+
+  GS.lastLogin = today;
+  GS.dailyClaimed = false;
+  GS.dailyDay = Math.min(GS.streak, 7);
+  saveGame();
+
+  // Offline earnings
+  if (lastLogin) {
+    const lastTime = new Date(GS.lastLogin).getTime();
+    // Actually lastLogin was just set to today, need to use the old value
+    // Let's recalculate
+  }
+
+  showDailyModal();
+}
+
+function showDailyModal() {
+  const modal = document.getElementById('dailyModal');
+  const grid = document.getElementById('dailyGrid');
+  const claimBtn = document.getElementById('dailyClaimBtn');
+
+  const day = Math.min(GS.streak, 7);
+
+  grid.innerHTML = DAILY_REWARDS.map((r, i) => {
+    const d = i + 1;
+    const isClaimed = d < day || (d === day && GS.dailyClaimed);
+    const isCurrent = d === day && !GS.dailyClaimed;
+    return `
+      <div class="daily-day ${isClaimed ? 'claimed' : ''} ${isCurrent ? 'current' : ''}">
+        <div class="daily-day-num">Day ${d}</div>
+        <div class="daily-day-icon"><i class="fa-solid ${r.icon}" style="color:${r.gems > 0 ? 'var(--teal)' : 'var(--gold)'}"></i></div>
+        ${isClaimed ? '<div class="daily-day-claimed"><i class="fa-solid fa-check"></i></div>' :
+          `<div class="daily-day-amount">${r.money > 0 ? '₹' + r.money : ''}${r.gems > 0 ? r.gems + ' 💎' : ''}</div>`}
+      </div>`;
+  }).join('');
+
+  if (GS.dailyClaimed || day < 1) {
+    claimBtn.classList.add('btn-disabled');
+    claimBtn.textContent = GS.dailyClaimed ? 'Already Claimed Today' : 'Come Back Tomorrow';
+  } else {
+    claimBtn.classList.remove('btn-disabled');
+    claimBtn.textContent = 'Claim Day ' + day + ' Reward';
+    claimBtn.onclick = claimDailyReward;
+  }
+
+  modal.classList.add('show');
+}
+
+function claimDailyReward() {
+  const day = Math.min(GS.streak, 7);
+  const reward = DAILY_REWARDS[day - 1];
+  if (!reward || GS.dailyClaimed) return;
+
+  GS.dailyClaimed = true;
+  GS.money += reward.money;
+  GS.gems += reward.gems;
+  GS.totalEarned += reward.money;
+
+  // Quest progress
+  GS.questProgress.streak3 = GS.streak;
+
+  updateHUD();
+  saveGame();
+  playSuccessSound();
+  spawnConfetti(20);
+
+  let msg = 'Claimed: ';
+  if (reward.money > 0) msg += `₹${reward.money} `;
+  if (reward.gems > 0) msg += `${reward.gems} Gems`;
+  showNotif(msg, 'gold');
+
+  document.getElementById('dailyModal').classList.remove('show');
+}
+
+document.getElementById('dailyCloseBtn').addEventListener('click', () => {
+  document.getElementById('dailyModal').classList.remove('show');
+});
+
+// ============ RANDOM EVENTS ============
+
+function maybeRandomEvent() {
+  if (Math.random() > 0.15) return; // 15% chance per session
+  const events = [
+    { text: 'A customer left a generous tip!', money: 20, type: 'success' },
+    { text: 'Found ₹15 in the sink drain!', money: 15, type: 'success' },
+    { text: 'Bonus shift pay!', money: 30, type: 'gold' },
+    { text: 'A coworker shared their snacks.', gems: 1, type: 'success' },
+  ];
+  const ev = events[Math.floor(Math.random() * events.length)];
+  setTimeout(() => {
+    if (ev.money) { GS.money += ev.money; GS.totalEarned += ev.money; }
+    if (ev.gems) GS.gems += ev.gems;
+    updateHUD();
+    saveGame();
+    showNotif(ev.text, ev.type);
+  }, 3000 + Math.random() * 8000);
+}
+
+// ============ INITIALIZATION ============
+
+function init() {
+  loadGame();
+
+  // Ensure current job is valid
+  if (!GS.unlockedJobs.includes(GS.currentJob)) {
+    GS.currentJob = GS.unlockedJobs[0] || 'dishwasher';
+  }
+
+  // Ensure required fields
+  if (!GS.unlockedJobs) GS.unlockedJobs = ['dishwasher'];
+  if (!GS.jobLevels) GS.jobLevels = { dishwasher: 1 };
+  if (!GS.jobXP) GS.jobXP = { dishwasher: 0 };
+  if (!GS.questProgress) GS.questProgress = {};
+  if (!GS.questsClaimed) GS.questsClaimed = [];
+  if (!GS.boosters) GS.boosters = { x2earn: 0, autoclean: false, lucky: 0 };
+
+  updateHUD();
+  renderWorkScreen();
+
+  // Check daily login
+  setTimeout(() => checkDailyLogin(), 600);
+
+  // Random events
+  maybeRandomEvent();
+
+  // Booster expiry checker
+  setInterval(() => {
+    if (GS.boosters.x2earn > 0 && GS.boosters.x2earn < Date.now()) {
+      GS.boosters.x2earn = 0;
+      showNotif('2x Earnings has expired', 'error');
+      saveGame();
+    }
+    if (GS.boosters.lucky > 0 && GS.boosters.lucky < Date.now()) {
+      GS.boosters.lucky = 0;
+      showNotif('Lucky Boost has expired', 'error');
+      saveGame();
+    }
+  }, 10000);
+
+  // Auto-save
+  setInterval(saveGame, 15000);
+
+  // Resume audio context on first interaction
+  document.addEventListener('click', () => {
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }, { once: true });
+  document.addEventListener('touchstart', () => {
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }, { once: true });
+}
+
+init();
+</script>
+</body>
+  </html>
